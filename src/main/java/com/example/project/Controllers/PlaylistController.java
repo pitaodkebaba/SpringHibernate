@@ -23,7 +23,7 @@ public class PlaylistController {
     }
 
     @GetMapping("/{id}")
-    public Optional<PlaylistDto> getPlaylistById(@PathVariable Long id) {
+    public Optional<PlaylistDto> getPlaylistById(@PathVariable int id) {
         return playlistService.getPlaylistById(id);
     }
 
@@ -33,7 +33,7 @@ public class PlaylistController {
     }
 
     @DeleteMapping("/{id}")
-    public void deletePlaylist(@PathVariable Long id) {
+    public void deletePlaylist(@PathVariable int id) {
         playlistService.deletePlaylist(id);
     }
 }

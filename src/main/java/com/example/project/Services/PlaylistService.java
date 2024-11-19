@@ -26,7 +26,7 @@ public class PlaylistService {
                 .collect(Collectors.toList());
     }
 
-    public Optional<PlaylistDto> getPlaylistById(Long id) {
+    public Optional<PlaylistDto> getPlaylistById(int id) {
         return playlistRepository.findById(id)
                 .map(this::convertToDto);
     }
@@ -37,7 +37,7 @@ public class PlaylistService {
         return convertToDto(savedPlaylist);
     }
 
-    public void deletePlaylist(Long id){
+    public void deletePlaylist(int id){
         playlistRepository.deleteById(id);
     }
 

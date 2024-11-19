@@ -1,8 +1,12 @@
 package com.example.project.Controllers;
 
 import com.example.project.Dtos.UserDto;
+import com.example.project.Models.User;
 import com.example.project.Services.UserService;
 import lombok.AllArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -20,7 +24,7 @@ public class UserController {
     }
 
     @GetMapping("/{id}")
-    public Optional<UserDto> getUserById(@PathVariable Long id) {
+    public Optional<UserDto> getUserById(@PathVariable int id) {
         return userService.getUserById(id);
     }
 

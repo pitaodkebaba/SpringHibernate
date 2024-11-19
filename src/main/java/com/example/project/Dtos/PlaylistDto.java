@@ -8,9 +8,9 @@ import lombok.Data;
 @Data
 public class PlaylistDto {
     @NotNull
-    private Long id;
+    private int id;
     @NotNull(message = "Name is required")
     private String name;
     @NotNull
-    private Long userId;
+    private int userId;
 }

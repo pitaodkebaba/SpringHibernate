@@ -4,6 +4,9 @@ import com.example.project.Dtos.UserDto;
 import com.example.project.Models.User;
 import com.example.project.Repositories.UserRepository;
 import lombok.AllArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -21,7 +24,7 @@ public class UserService {
                 .collect(Collectors.toList());
     }
 
-    public Optional<UserDto> getUserById(Long id) {
+    public Optional<UserDto> getUserById(int id) {
         return userRepository.findById(id).stream()
                 .map(this::convertToDto)
                 .findFirst();
@@ -32,8 +35,15 @@ public class UserService {
         userRepository.save(user);
     }
 
-    public void deleteUser(Long id) {
+    public void deleteUser(int id) {
         userRepository.deleteById(id);
+    }
+
+    public ResponseEntity<User> authencticatedUser() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        System.out.println(authentication.getPrincipal());
+        User currentUser = (User) authentication.getPrincipal();
+        return ResponseEntity.ok(currentUser);
     }
 
     private UserDto convertToDto(User user) {
