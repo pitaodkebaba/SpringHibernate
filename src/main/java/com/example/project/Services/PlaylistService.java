@@ -3,8 +3,10 @@ package com.example.project.Services;
 
 import com.example.project.Dtos.PlaylistDto;
 import com.example.project.Models.Playlist;
+import com.example.project.Models.Song;
 import com.example.project.Models.User;
 import com.example.project.Repositories.PlaylistRepository;
+import com.example.project.Repositories.SongRepository;
 import com.example.project.Repositories.UserRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -17,6 +19,7 @@ import java.util.stream.Collectors;
 @AllArgsConstructor
 public class PlaylistService {
     public final PlaylistRepository playlistRepository;
+    public final SongRepository songRepository;
     private final UserRepository userRepository;
 
     public List<PlaylistDto> getPlaylists() {
@@ -31,22 +34,27 @@ public class PlaylistService {
                 .map(this::convertToDto);
     }
 
-    public PlaylistDto createPlaylist(PlaylistDto playlistDto){
-        Playlist playlist = convertToEntity(playlistDto);
-        Playlist savedPlaylist = playlistRepository.save(playlist);
-        return convertToDto(savedPlaylist);
+    public void createPlaylist(Playlist playlist){
+        playlistRepository.save(playlist);
+    }
+
+    public void addSongToPlaylist(int playlistId, int songId){
+        Playlist playlist = playlistRepository.findById(playlistId).orElseThrow();
+        Song song = songRepository.findById(songId).orElseThrow();
+        playlist.getSongs().add(song);
+        playlistRepository.save(playlist);
     }
 
     public void deletePlaylist(int id){
         playlistRepository.deleteById(id);
     }
 
-    //Konwersja dto
     private PlaylistDto convertToDto(Playlist playlist) {
         PlaylistDto playlistDto = new PlaylistDto();
         playlistDto.setId(playlist.getId());
         playlistDto.setName(playlist.getName());
-        playlistDto.setUserId(playlist.getUser().getId());
+        playlistDto.setOwner(playlist.getUser().getUsername());
+        playlistDto.setSongs(playlist.getSongs().stream().map(Song::getTitle).collect(Collectors.toList()));
         return playlistDto;
     }
 
@@ -55,8 +63,13 @@ public class PlaylistService {
         playlist.setName(playlistDto.getName());
         playlist.setId(playlistDto.getId());
 
-        User user = userRepository.findById(playlistDto.getUserId()).orElseThrow();
+        User user = userRepository.findByEmail(playlistDto.getOwner()).orElseThrow();
         playlist.setUser(user);
+
+        List<Song> songs = playlistDto.getSongs().stream()
+                .map(songRepository::findByTitle)
+                .collect(Collectors.toList());
+        playlist.setSongs(songs);
 
         return playlist;
     }

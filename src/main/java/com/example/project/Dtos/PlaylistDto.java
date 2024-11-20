@@ -5,6 +5,8 @@ import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
+import java.util.List;
+
 @Data
 public class PlaylistDto {
     @NotNull
@@ -12,5 +14,7 @@ public class PlaylistDto {
     @NotNull(message = "Name is required")
     private String name;
     @NotNull
-    private int userId;
+    private String owner;
+    @NotNull
+    private List<String> songs;
 }

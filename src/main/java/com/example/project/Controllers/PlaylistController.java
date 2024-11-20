@@ -28,8 +28,13 @@ public class PlaylistController {
     }
 
     @PostMapping
-    public void createPlaylist(@RequestBody PlaylistDto playlistDto) {
-        playlistService.createPlaylist(playlistDto);
+    public void createPlaylist(@RequestBody Playlist playlist) {
+        playlistService.createPlaylist(playlist);
+    }
+
+    @PostMapping("/{playlistId}/addSong/{songId}")
+    public void addSongToPlaylist(@PathVariable int playlistId, @PathVariable int songId) {
+        playlistService.addSongToPlaylist(playlistId, songId);
     }
 
     @DeleteMapping("/{id}")
