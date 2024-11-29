@@ -5,10 +5,10 @@ import com.example.project.Models.User;
 import com.example.project.Services.UserService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.nio.file.AccessDeniedException;
 import java.util.List;
 import java.util.Optional;
 
@@ -18,9 +18,10 @@ import java.util.Optional;
 public class UserController {
     private final UserService userService;
 
+    @PreAuthorize("hasAuthority('ADMIN')")
     @GetMapping
-    public List<UserDto> getUsers() {
-        return userService.getUsers();
+    public ResponseEntity<List<UserDto>> getUsers() {
+        return ResponseEntity.ok(userService.getUsers());
     }
 
     @GetMapping("/{id}")
@@ -31,5 +32,14 @@ public class UserController {
     @PostMapping
     public void createUser(@RequestBody UserDto userDto) {
         userService.createUser(userDto);
+    }
+
+    @GetMapping("/me")
+    public ResponseEntity<UserDto> getAuthenticatedUser() throws AccessDeniedException {
+        User authenticatedUser = userService.authencticatedUser();
+        UserDto userDto = new UserDto();
+        userDto.setUsername(authenticatedUser.getUsername());
+        userDto.setPassword(authenticatedUser.getPassword());
+        return ResponseEntity.ok(userDto);
     }
 }

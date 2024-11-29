@@ -1,9 +1,11 @@
 package com.example.project.Models;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
@@ -17,9 +19,17 @@ import java.util.List;
 @Entity
 @Table(name = "users")
 public class User implements UserDetails {
+    public enum Role implements GrantedAuthority {
+        USER, ADMIN;
+
+        @Override
+        public String getAuthority() {
+            return name();
+        }
+    }
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(nullable = false)
     private int id;
     @Column(nullable = false)
     private String username;
@@ -33,11 +43,16 @@ public class User implements UserDetails {
     @CreationTimestamp
     @Column(nullable = false, name = "updated_at")
     private Date updatedAt;
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private Role role;
+
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    @JsonIgnore
     private List<Playlist> playlists;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of();
+        return List.of(new SimpleGrantedAuthority(role.name()));
     }
 }

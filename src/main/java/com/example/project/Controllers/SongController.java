@@ -4,6 +4,7 @@ import com.example.project.Dtos.SongDto;
 import com.example.project.Models.Song;
 import com.example.project.Services.SongService;
 import lombok.AllArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -14,11 +15,12 @@ import java.util.List;
 public class SongController {
     private final SongService songService;
 
+    @PreAuthorize("hasAuthority('ADMIN')")
     @PostMapping
     public void createSong(@RequestBody Song song) {
         songService.createSong(song);
     }
-
+    @PreAuthorize("hasAuthority('ADMIN')")
     @PostMapping("/delete/{id}")
     public void deleteSong(@RequestBody int id) {
         songService.deleteSong(id);

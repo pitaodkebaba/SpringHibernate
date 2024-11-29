@@ -31,6 +31,7 @@ public class AuthenticationService {
         User user = User.builder()
                 .username(input.getUsername())
                 .email(input.getEmail())
+                .role(User.Role.valueOf("USER"))
                 .password(passwordEncoder.encode(input.getPassword()))
                 .build();
 
@@ -40,12 +41,12 @@ public class AuthenticationService {
     public User authenticate(LoginUserDto input) {
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
-                        input.getEmail(),
+                        input.getUsername(),
                         input.getPassword()
                 )
         );
 
-        return userRepository.findByEmail(input.getEmail())
+        return userRepository.findByUsername(input.getUsername())
                 .orElseThrow(() -> new RuntimeException("User not found"));
     }
 }

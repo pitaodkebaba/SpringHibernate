@@ -9,6 +9,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import java.nio.channels.AcceptPendingException;
+import java.nio.file.AccessDeniedException;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -32,6 +34,7 @@ public class UserService {
 
     public void createUser(UserDto userDto) {
         User user = convertToEntity(userDto);
+        user.setRole(User.Role.USER);
         userRepository.save(user);
     }
 
@@ -39,23 +42,29 @@ public class UserService {
         userRepository.deleteById(id);
     }
 
-    public ResponseEntity<User> authencticatedUser() {
+    public User authencticatedUser() throws AccessDeniedException {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        System.out.println(authentication.getPrincipal());
-        User currentUser = (User) authentication.getPrincipal();
-        return ResponseEntity.ok(currentUser);
+        var principal = authentication.getPrincipal();
+        if (principal instanceof User user) {
+            return user;
+        }
+        throw new AccessDeniedException("User not found");
     }
 
     private UserDto convertToDto(User user) {
         UserDto userDto = new UserDto();
+        userDto.setId(user.getId());
         userDto.setUsername(user.getUsername());
         userDto.setPassword(user.getPassword());
+        userDto.setEmail(user.getEmail());
         return userDto;
     }
 
     private User convertToEntity(UserDto userDto) {
         User user = new User();
+        user.setId(userDto.getId());
         user.setUsername(userDto.getUsername());
+        user.setEmail(userDto.getEmail());
         user.setPassword(userDto.getPassword());
         return user;
     }
