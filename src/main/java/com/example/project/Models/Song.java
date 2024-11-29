@@ -26,8 +26,9 @@ public class Song {
     private String artist;
     @Column(nullable = false)
     private String album;
-    @Column(nullable = false)
-    private String genre;
+
+    @ManyToOne
+    private Genre genre;
 
     @ManyToMany(mappedBy = "songs")
     private List<Playlist> playlists;
