@@ -1,9 +1,12 @@
 package com.example.project.Controllers;
 
-import com.example.project.Dtos.SongDto;
+import com.example.project.Dtos.CreateSongDto;
 import com.example.project.Models.Song;
+import com.example.project.Responses.SuccessResponse;
 import com.example.project.Services.SongService;
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,17 +20,22 @@ public class SongController {
 
     @PreAuthorize("hasAuthority('ADMIN')")
     @PostMapping
-    public void createSong(@RequestBody Song song) {
+    public ResponseEntity<SuccessResponse<Void>> createSong(@Valid @RequestBody CreateSongDto song) {
         songService.createSong(song);
+        SuccessResponse<Void> response = new SuccessResponse<>("Success", "Song created successfully", null);
+        return ResponseEntity.ok(response);
     }
+
     @PreAuthorize("hasAuthority('ADMIN')")
     @PostMapping("/delete/{id}")
-    public void deleteSong(@RequestBody int id) {
+    public ResponseEntity<SuccessResponse<Void>> deleteSong(@PathVariable int id) {
         songService.deleteSong(id);
+        SuccessResponse<Void> response = new SuccessResponse<>("Success", "Song deleted successfully", null);
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping
-    public List<SongDto> getAllSongs() {
+    public List<Song> getAllSongs() {
         return songService.getAllSongs();
     }
 

@@ -1,16 +1,19 @@
 package com.example.project.Services;
 
 
-import com.example.project.Dtos.PlaylistDto;
+import com.example.project.Dtos.CreatePlaylistDto;
 import com.example.project.Models.Playlist;
 import com.example.project.Models.Song;
 import com.example.project.Models.User;
 import com.example.project.Repositories.PlaylistRepository;
 import com.example.project.Repositories.SongRepository;
 import com.example.project.Repositories.UserRepository;
+import com.example.project.Responses.GetPlaylistResponse;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.nio.file.AccessDeniedException;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -21,21 +24,29 @@ public class PlaylistService {
     public final PlaylistRepository playlistRepository;
     public final SongRepository songRepository;
     private final UserRepository userRepository;
+    private final UserService userService;
 
-    public List<PlaylistDto> getPlaylists() {
-        return playlistRepository.findAll()
-                .stream()
-                .map(this::convertToDto)
-                .collect(Collectors.toList());
+    public List<Playlist> getPlaylists() {
+        return playlistRepository.findAll();
     }
 
-    public Optional<PlaylistDto> getPlaylistById(int id) {
+    public Optional<GetPlaylistResponse> getPlaylistById(int id) {
         return playlistRepository.findById(id)
-                .map(this::convertToDto);
+                .map(playlist -> {
+                    GetPlaylistResponse response = new GetPlaylistResponse();
+                    response.setName(playlist.getName());
+                    response.setUsername(playlist.getUser().getUsername());
+                    response.setSongs(playlist.getSongs().stream().map(Song::getTitle).collect(Collectors.toList()));
+                    return response;
+                });
     }
 
-    public void createPlaylist(Playlist playlist){
-        playlistRepository.save(playlist);
+    @Transactional
+    public void createPlaylist(int userId, CreatePlaylistDto playlist) throws AccessDeniedException {
+        Playlist newPlaylist = convertToEntity(playlist);
+        User user = userRepository.findById(userId).orElseThrow();
+        newPlaylist.setUser(user);
+        playlistRepository.save(newPlaylist);
     }
 
     public void addSongToPlaylist(int playlistId, int songId){
@@ -49,25 +60,21 @@ public class PlaylistService {
         playlistRepository.deleteById(id);
     }
 
-    private PlaylistDto convertToDto(Playlist playlist) {
-        PlaylistDto playlistDto = new PlaylistDto();
-        playlistDto.setId(playlist.getId());
-        playlistDto.setName(playlist.getName());
-        playlistDto.setOwner(playlist.getUser().getUsername());
-        playlistDto.setSongs(playlist.getSongs().stream().map(Song::getTitle).collect(Collectors.toList()));
-        return playlistDto;
+    private CreatePlaylistDto convertToDto(Playlist playlist) {
+        CreatePlaylistDto createPlaylistDto = new CreatePlaylistDto();
+        createPlaylistDto.setName(playlist.getName());
+        createPlaylistDto.setSongIds(playlist.getSongs().stream().map(Song::getId).collect(Collectors.toList()));
+        return createPlaylistDto;
     }
 
-    private Playlist convertToEntity(PlaylistDto playlistDto){
+    private Playlist convertToEntity(CreatePlaylistDto createPlaylistDto){
         Playlist playlist = new Playlist();
-        playlist.setName(playlistDto.getName());
-        playlist.setId(playlistDto.getId());
+        playlist.setName(createPlaylistDto.getName());
 
-        User user = userRepository.findByEmail(playlistDto.getOwner()).orElseThrow();
-        playlist.setUser(user);
-
-        List<Song> songs = playlistDto.getSongs().stream()
-                .map(songRepository::findByTitle)
+        List<Song> songs = createPlaylistDto.getSongIds().stream()
+                .map(songRepository::findById)
+                .filter(Optional::isPresent)
+                .map(Optional::get)
                 .collect(Collectors.toList());
         playlist.setSongs(songs);
 

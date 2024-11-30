@@ -1,13 +1,20 @@
 package com.example.project.Controllers;
 
-import com.example.project.Dtos.PlaylistDto;
+import com.example.project.Dtos.CreatePlaylistDto;
 import com.example.project.Models.Playlist;
+import com.example.project.Models.User;
 import com.example.project.Repositories.PlaylistRepository;
+import com.example.project.Repositories.UserRepository;
+import com.example.project.Responses.GetPlaylistResponse;
+import com.example.project.Responses.SuccessResponse;
 import com.example.project.Services.PlaylistService;
+import com.example.project.Services.UserService;
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.nio.file.AccessDeniedException;
 import java.util.List;
 import java.util.Optional;
 
@@ -16,29 +23,43 @@ import java.util.Optional;
 @AllArgsConstructor
 public class PlaylistController {
     private final PlaylistService playlistService;
+    private final PlaylistRepository playlistRepository;
+    private final UserRepository userRepository;
+    private final UserService userService;
 
     @GetMapping
-    public List<PlaylistDto> getPlaylists() {
-        return playlistService.getPlaylists();
+    public ResponseEntity<List<Playlist>> getPlaylists() {
+        return ResponseEntity.ok(playlistService.getPlaylists());
     }
 
     @GetMapping("/{id}")
-    public Optional<PlaylistDto> getPlaylistById(@PathVariable int id) {
+    public Optional<GetPlaylistResponse> getPlaylistById(@PathVariable int id) {
         return playlistService.getPlaylistById(id);
     }
 
     @PostMapping
-    public void createPlaylist(@RequestBody Playlist playlist) {
-        playlistService.createPlaylist(playlist);
+    public ResponseEntity<SuccessResponse<Void>> createPlaylist(@Valid @RequestBody CreatePlaylistDto playlist) throws AccessDeniedException {
+        User user = userService.authencticatedUser();
+        playlistService.createPlaylist(user.getId(), playlist);
+        SuccessResponse<Void> response = new SuccessResponse<>("Success", "Playlist created successfully", null);
+        return ResponseEntity.ok(response);
     }
 
     @PostMapping("/{playlistId}/addSong/{songId}")
-    public void addSongToPlaylist(@PathVariable int playlistId, @PathVariable int songId) {
+    public ResponseEntity<SuccessResponse<Void>> addSongToPlaylist(@PathVariable int playlistId, @PathVariable int songId) {
         playlistService.addSongToPlaylist(playlistId, songId);
+        SuccessResponse<Void> response = new SuccessResponse<>(
+                "Success", "Song added to playlist " + playlistRepository
+                .findById(playlistId)
+                .map(Playlist::getName)
+                .orElse(String.valueOf(playlistId)) + " successfully", null);
+        return ResponseEntity.ok(response);
     }
 
     @DeleteMapping("/{id}")
-    public void deletePlaylist(@PathVariable int id) {
+    public ResponseEntity<SuccessResponse<Void>> deletePlaylist(@PathVariable int id) {
         playlistService.deletePlaylist(id);
+        SuccessResponse<Void> response = new SuccessResponse<>("Success", "Playlist deleted successfully", null);
+        return ResponseEntity.ok(response);
     }
 }

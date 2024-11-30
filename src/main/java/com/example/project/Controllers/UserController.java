@@ -3,6 +3,7 @@ package com.example.project.Controllers;
 import com.example.project.Dtos.UserDto;
 import com.example.project.Models.User;
 import com.example.project.Services.UserService;
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -30,7 +31,7 @@ public class UserController {
     }
 
     @PostMapping
-    public void createUser(@RequestBody UserDto userDto) {
+    public void createUser(@Valid @RequestBody UserDto userDto) {
         userService.createUser(userDto);
     }
 
@@ -38,7 +39,9 @@ public class UserController {
     public ResponseEntity<UserDto> getAuthenticatedUser() throws AccessDeniedException {
         User authenticatedUser = userService.authencticatedUser();
         UserDto userDto = new UserDto();
+        userDto.setId(authenticatedUser.getId());
         userDto.setUsername(authenticatedUser.getUsername());
+        userDto.setEmail(authenticatedUser.getEmail());
         userDto.setPassword(authenticatedUser.getPassword());
         return ResponseEntity.ok(userDto);
     }

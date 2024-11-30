@@ -1,8 +1,11 @@
 package com.example.project.Controllers;
 
+import com.example.project.Dtos.CreateGenreDto;
 import com.example.project.Models.Genre;
+import com.example.project.Responses.SuccessResponse;
 import com.example.project.Services.GenreService;
 import lombok.AllArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.parameters.P;
 import org.springframework.web.bind.annotation.*;
@@ -23,8 +26,10 @@ public class GenreController {
 
     @PreAuthorize("hasAuthority('ADMIN')")
     @PostMapping
-    public void createGenre(Genre genre) {
+    public ResponseEntity<SuccessResponse<Void>> createGenre(CreateGenreDto genre) {
         genreService.createGenre(genre);
+        SuccessResponse<Void> response = new SuccessResponse<>("Success", "Genre created successfully", null);
+        return ResponseEntity.ok(response);
     }
 
     @PreAuthorize("hasAuthority('ADMIN')")
