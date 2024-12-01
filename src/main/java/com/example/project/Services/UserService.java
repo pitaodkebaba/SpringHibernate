@@ -4,12 +4,10 @@ import com.example.project.Dtos.UserDto;
 import com.example.project.Models.User;
 import com.example.project.Repositories.UserRepository;
 import lombok.AllArgsConstructor;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
-import java.nio.channels.AcceptPendingException;
 import java.nio.file.AccessDeniedException;
 import java.util.List;
 import java.util.Optional;
@@ -33,12 +31,18 @@ public class UserService {
     }
 
     public void createUser(UserDto userDto) {
+        if (userRepository.existsById(userDto.getId())) {
+            throw new IllegalArgumentException("User already exists");
+        }
         User user = convertToEntity(userDto);
         user.setRole(User.Role.USER);
         userRepository.save(user);
     }
 
     public void deleteUser(int id) {
+        if (!userRepository.existsById(id)) {
+            throw new IllegalArgumentException("User with id: " + id + " not found");
+        }
         userRepository.deleteById(id);
     }
 

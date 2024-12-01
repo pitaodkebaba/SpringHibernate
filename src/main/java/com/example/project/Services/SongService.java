@@ -28,18 +28,20 @@ public class SongService {
     @Transactional
     public void createSong(CreateSongDto song) {
         if (songRepository.existsByTitleAndAlbum(song.getTitle(), song.getAlbum())) {
-            throw new IllegalArgumentException("Song already exists");
+            throw new IllegalArgumentException("Song already exists on that album");
         }
         songRepository.save(convertToEntity(song));
     }
 
     public void deleteSong(int id) {
+        if (!songRepository.existsById(id)) {
+            throw new IllegalArgumentException("Song with id: " + id + " not found");
+        }
         songRepository.delete(songRepository.findById(id).orElseThrow());
     }
 
     public CreateSongDto convertToDto(Song song) {
         CreateSongDto createSongDto = new CreateSongDto();
-        createSongDto.setId(song.getId());
         createSongDto.setTitle(song.getTitle());
         createSongDto.setArtist(song.getArtist());
         createSongDto.setAlbum(song.getAlbum());
@@ -49,7 +51,6 @@ public class SongService {
 
     public Song convertToEntity(CreateSongDto createSongDto) {
         Song song = new Song();
-        song.setId(createSongDto.getId());
         song.setTitle(createSongDto.getTitle());
         song.setArtist(createSongDto.getArtist());
         song.setAlbum(createSongDto.getAlbum());

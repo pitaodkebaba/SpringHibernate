@@ -8,7 +8,8 @@ import java.util.List;
 
 @Data
 public class CreatePlaylistDto {
-    @NotBlank(message = "Name is mandatory")
+    @NotBlank(message = "Playlist name is mandatory")
     private String name;
+    //Playlist may be added without songs
     private List<Integer> songIds;
 }

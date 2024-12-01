@@ -1,10 +1,7 @@
 package com.example.project.Controllers;
 
 import com.example.project.Dtos.CreatePlaylistDto;
-import com.example.project.Models.Playlist;
 import com.example.project.Models.User;
-import com.example.project.Repositories.PlaylistRepository;
-import com.example.project.Repositories.UserRepository;
 import com.example.project.Responses.GetPlaylistResponse;
 import com.example.project.Responses.SuccessResponse;
 import com.example.project.Services.PlaylistService;
@@ -23,22 +20,24 @@ import java.util.Optional;
 @AllArgsConstructor
 public class PlaylistController {
     private final PlaylistService playlistService;
-    private final PlaylistRepository playlistRepository;
-    private final UserRepository userRepository;
     private final UserService userService;
 
     @GetMapping
-    public ResponseEntity<List<Playlist>> getPlaylists() {
-        return ResponseEntity.ok(playlistService.getPlaylists());
+    public ResponseEntity<SuccessResponse<List<GetPlaylistResponse>>> getPlaylists() {
+        List<GetPlaylistResponse> playlists = playlistService.getPlaylists();
+        SuccessResponse<List<GetPlaylistResponse>> response = new SuccessResponse<>("Success", "Playlists retrieved successfully", playlists);
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/{id}")
-    public Optional<GetPlaylistResponse> getPlaylistById(@PathVariable int id) {
-        return playlistService.getPlaylistById(id);
+    public ResponseEntity<?> getPlaylistById(@PathVariable int id) {
+        Optional<GetPlaylistResponse> playlist = playlistService.getPlaylistById(id);
+        SuccessResponse<Optional<GetPlaylistResponse>> response = new SuccessResponse<>("Success", "Playlist retrieved successfully", playlist);
+        return ResponseEntity.ok(response);
     }
 
     @PostMapping
-    public ResponseEntity<SuccessResponse<Void>> createPlaylist(@Valid @RequestBody CreatePlaylistDto playlist) throws AccessDeniedException {
+    public ResponseEntity<?> createPlaylist(@Valid @RequestBody CreatePlaylistDto playlist) throws AccessDeniedException {
         User user = userService.authencticatedUser();
         playlistService.createPlaylist(user.getId(), playlist);
         SuccessResponse<Void> response = new SuccessResponse<>("Success", "Playlist created successfully", null);
@@ -46,18 +45,14 @@ public class PlaylistController {
     }
 
     @PostMapping("/{playlistId}/addSong/{songId}")
-    public ResponseEntity<SuccessResponse<Void>> addSongToPlaylist(@PathVariable int playlistId, @PathVariable int songId) {
+    public ResponseEntity<?> addSongToPlaylist(@PathVariable int playlistId, @PathVariable int songId) {
         playlistService.addSongToPlaylist(playlistId, songId);
-        SuccessResponse<Void> response = new SuccessResponse<>(
-                "Success", "Song added to playlist " + playlistRepository
-                .findById(playlistId)
-                .map(Playlist::getName)
-                .orElse(String.valueOf(playlistId)) + " successfully", null);
+        SuccessResponse<Void> response = new SuccessResponse<>("Success", "Song added to playlist successfully", null);
         return ResponseEntity.ok(response);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<SuccessResponse<Void>> deletePlaylist(@PathVariable int id) {
+    public ResponseEntity<?> deletePlaylist(@PathVariable int id) {
         playlistService.deletePlaylist(id);
         SuccessResponse<Void> response = new SuccessResponse<>("Success", "Playlist deleted successfully", null);
         return ResponseEntity.ok(response);

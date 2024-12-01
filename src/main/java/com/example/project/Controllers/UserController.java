@@ -2,6 +2,7 @@ package com.example.project.Controllers;
 
 import com.example.project.Dtos.UserDto;
 import com.example.project.Models.User;
+import com.example.project.Responses.SuccessResponse;
 import com.example.project.Services.UserService;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
@@ -21,18 +22,34 @@ public class UserController {
 
     @PreAuthorize("hasAuthority('ADMIN')")
     @GetMapping
-    public ResponseEntity<List<UserDto>> getUsers() {
-        return ResponseEntity.ok(userService.getUsers());
+    public ResponseEntity<SuccessResponse<List<UserDto>>> getUsers() {
+        List<UserDto> users = userService.getUsers();
+        SuccessResponse<List<UserDto>> response = new SuccessResponse<>("Success", "Users retrieved successfully", users);
+        return ResponseEntity.ok(response);
     }
 
+    @PreAuthorize("hasAuthority('ADMIN')")
     @GetMapping("/{id}")
-    public Optional<UserDto> getUserById(@PathVariable int id) {
-        return userService.getUserById(id);
+    public ResponseEntity<SuccessResponse<Optional<UserDto>>> getUserById(@PathVariable int id) {
+        Optional<UserDto> user = userService.getUserById(id);
+        SuccessResponse<Optional<UserDto>> response = new SuccessResponse<>("Success", "User with id: " + id + " retrieved successfully", user);
+        return ResponseEntity.ok(response);
     }
 
+    @PreAuthorize("hasAuthority('ADMIN')")
     @PostMapping
-    public void createUser(@Valid @RequestBody UserDto userDto) {
+    public ResponseEntity<SuccessResponse<Void>> createUser(@Valid @RequestBody UserDto userDto) {
         userService.createUser(userDto);
+        SuccessResponse<Void> response = new SuccessResponse<>("Success", "User created successfully", null);
+        return ResponseEntity.ok(response);
+    }
+
+    @PreAuthorize("hasAuthority('ADMIN')")
+    @PostMapping("/delete/{id}")
+    public ResponseEntity<SuccessResponse<Void>> deleteUser(@PathVariable int id) {
+        userService.deleteUser(id);
+        SuccessResponse<Void> response = new SuccessResponse<>("Success", "User with id: " + id + " deleted successfully", null);
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/me")

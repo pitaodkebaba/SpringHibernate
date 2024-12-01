@@ -1,6 +1,5 @@
 package com.example.project.Responses;
 
-import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -10,6 +9,6 @@ import java.util.List;
 @NoArgsConstructor
 public class GetPlaylistResponse {
     private String name;
-    private String username;
+    private String owner;
     private List<String> songs;
 }

@@ -1,6 +1,7 @@
 package com.example.project.Models;
 
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -31,5 +32,6 @@ public class Song {
     private Genre genre;
 
     @ManyToMany(mappedBy = "songs")
+    @JsonIgnore
     private List<Playlist> playlists;
 }

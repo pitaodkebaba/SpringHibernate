@@ -35,8 +35,10 @@ public class SongController {
     }
 
     @GetMapping
-    public List<Song> getAllSongs() {
-        return songService.getAllSongs();
+    public ResponseEntity<SuccessResponse<List<Song>>> getAllSongs() {
+        List<Song> songs = songService.getAllSongs();
+        SuccessResponse<List<Song>> response = new SuccessResponse<>("Success", "Songs retrieved successfully", songs);
+        return ResponseEntity.ok(response);
     }
 
 }
