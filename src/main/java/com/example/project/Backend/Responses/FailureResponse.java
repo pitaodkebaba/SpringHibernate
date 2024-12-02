@@ -1,0 +1,14 @@
+package com.example.project.Backend.Responses;
+
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@AllArgsConstructor
+@NoArgsConstructor
+@Data
+public class FailureResponse<T> {
+    private String status;
+    private String message;
+    private T data;
+}
