@@ -2,14 +2,20 @@ package com.example.project.Backend.Services;
 
 import com.example.project.Backend.Dtos.CreateSongDto;
 import com.example.project.Backend.Models.Song;
+import com.example.project.Backend.Models.User;
 import com.example.project.Backend.Repositories.GenreRepository;
 import com.example.project.Backend.Repositories.SongRepository;
+import com.example.project.Backend.Responses.AdminSongResponse;
+import com.example.project.Backend.Responses.SongResponse;
 import lombok.AllArgsConstructor;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
@@ -17,8 +23,19 @@ public class SongService {
     private final SongRepository songRepository;
     private final GenreRepository genreRepository;
 
-    public List<Song> getAllSongs() {
-        return songRepository.findAll();
+    public List<? extends SongResponse> getAllSongs() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        User user = (User) authentication.getPrincipal();
+
+        if (user.getAuthorities().stream().anyMatch(auth -> auth.getAuthority().equals("ADMIN"))) {
+            return songRepository.findAll().stream()
+                    .map(this::convertToAdminResponse)
+                    .collect(Collectors.toList());
+        } else {
+            return songRepository.findAll().stream()
+                    .map(this::convertToResponse)
+                    .collect(Collectors.toList());
+        }
     }
 
     public Optional<Song> getSongById(int id) {
@@ -31,6 +48,18 @@ public class SongService {
             throw new IllegalArgumentException("Song already exists on that album");
         }
         songRepository.save(convertToEntity(song));
+    }
+
+    public void updateSong(int id, CreateSongDto song) {
+        if (!songRepository.existsById(id)) {
+            throw new IllegalArgumentException("Song with id: " + id + " not found");
+        }
+        Song songToUpdate = songRepository.findById(id).orElseThrow();
+        songToUpdate.setTitle(song.getTitle());
+        songToUpdate.setArtist(song.getArtist());
+        songToUpdate.setAlbum(song.getAlbum());
+        songToUpdate.setGenre(genreRepository.findById(song.getGenreId()).orElseThrow());
+        songRepository.save(songToUpdate);
     }
 
     public void deleteSong(int id) {
@@ -56,5 +85,25 @@ public class SongService {
         song.setAlbum(createSongDto.getAlbum());
         song.setGenre(genreRepository.findById(createSongDto.getGenreId()).orElseThrow());
         return song;
+    }
+
+    private SongResponse convertToResponse(Song song) {
+        return SongResponse.builder()
+                .title(song.getTitle())
+                .artist(song.getArtist())
+                .album(song.getAlbum())
+                .genre(song.getGenre().getName())
+                .build();
+    }
+
+    private AdminSongResponse convertToAdminResponse(Song song) {
+        return AdminSongResponse.builder()
+                .id(String.valueOf(song.getId()))
+                .title(song.getTitle())
+                .artist(song.getArtist())
+                .album(song.getAlbum())
+                .genre(song.getGenre().getName())
+                .genreId(String.valueOf(song.getGenre().getId()))
+                .build();
     }
 }

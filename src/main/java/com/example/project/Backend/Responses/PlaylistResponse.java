@@ -7,7 +7,7 @@ import java.util.List;
 
 @Data
 @NoArgsConstructor
-public class GetPlaylistResponse {
+public class PlaylistResponse {
     private String name;
     private String owner;
     private List<String> songs;

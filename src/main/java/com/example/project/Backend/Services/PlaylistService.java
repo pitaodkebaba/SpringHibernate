@@ -8,7 +8,7 @@ import com.example.project.Backend.Models.User;
 import com.example.project.Backend.Repositories.PlaylistRepository;
 import com.example.project.Backend.Repositories.SongRepository;
 import com.example.project.Backend.Repositories.UserRepository;
-import com.example.project.Backend.Responses.GetPlaylistResponse;
+import com.example.project.Backend.Responses.PlaylistResponse;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -27,10 +27,10 @@ public class PlaylistService {
     private final UserRepository userRepository;
     private final UserService userService;
 
-    public List<GetPlaylistResponse> getPlaylists() {
+    public List<PlaylistResponse> getPlaylists() {
         return playlistRepository.findAll().stream()
                 .map(playlist -> {
-                    GetPlaylistResponse response = new GetPlaylistResponse();
+                    PlaylistResponse response = new PlaylistResponse();
                     response.setName(playlist.getName());
                     response.setOwner(playlist.getUser().getUsername());
                     response.setSongs(playlist.getSongs().stream().map(Song::getTitle).collect(Collectors.toList()));

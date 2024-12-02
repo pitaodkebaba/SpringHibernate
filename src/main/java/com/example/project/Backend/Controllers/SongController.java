@@ -2,6 +2,7 @@ package com.example.project.Backend.Controllers;
 
 import com.example.project.Backend.Dtos.CreateSongDto;
 import com.example.project.Backend.Models.Song;
+import com.example.project.Backend.Responses.SongResponse;
 import com.example.project.Backend.Responses.SuccessResponse;
 import com.example.project.Backend.Services.SongService;
 import jakarta.validation.Valid;
@@ -34,10 +35,18 @@ public class SongController {
         return ResponseEntity.ok(response);
     }
 
+    @PreAuthorize("hasAuthority('ADMIN')")
+    @PutMapping("/{id}")
+    public ResponseEntity<SuccessResponse<Void>> updateSong(@PathVariable int id, @Valid @RequestBody CreateSongDto song) {
+        songService.updateSong(id, song);
+        SuccessResponse<Void> response = new SuccessResponse<>("Success", "Song updated successfully", null);
+        return ResponseEntity.ok(response);
+    }
+
     @GetMapping
-    public ResponseEntity<SuccessResponse<List<Song>>> getAllSongs() {
-        List<Song> songs = songService.getAllSongs();
-        SuccessResponse<List<Song>> response = new SuccessResponse<>("Success", "Songs retrieved successfully", songs);
+    public ResponseEntity<SuccessResponse<List<? extends SongResponse>>> getAllSongs() {
+        List<? extends SongResponse> songs = songService.getAllSongs();
+        SuccessResponse<List<? extends SongResponse>> response = new SuccessResponse<>("Success", "Songs retrieved successfully", songs);
         return ResponseEntity.ok(response);
     }
 

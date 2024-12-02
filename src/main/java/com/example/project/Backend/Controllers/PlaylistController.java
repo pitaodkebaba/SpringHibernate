@@ -3,7 +3,7 @@ package com.example.project.Backend.Controllers;
 import com.example.project.Backend.Dtos.CreatePlaylistDto;
 import com.example.project.Backend.Models.Playlist;
 import com.example.project.Backend.Models.User;
-import com.example.project.Backend.Responses.GetPlaylistResponse;
+import com.example.project.Backend.Responses.PlaylistResponse;
 import com.example.project.Backend.Responses.SuccessResponse;
 import com.example.project.Backend.Services.PlaylistService;
 import com.example.project.Backend.Services.UserService;
@@ -24,9 +24,9 @@ public class PlaylistController {
     private final UserService userService;
 
     @GetMapping
-    public ResponseEntity<SuccessResponse<List<GetPlaylistResponse>>> getPlaylists() {
-        List<GetPlaylistResponse> playlists = playlistService.getPlaylists();
-        SuccessResponse<List<GetPlaylistResponse>> response = new SuccessResponse<>("Success", "Playlists retrieved successfully", playlists);
+    public ResponseEntity<SuccessResponse<List<PlaylistResponse>>> getPlaylists() {
+        List<PlaylistResponse> playlists = playlistService.getPlaylists();
+        SuccessResponse<List<PlaylistResponse>> response = new SuccessResponse<>("Success", "Playlists retrieved successfully", playlists);
         return ResponseEntity.ok(response);
     }
 
