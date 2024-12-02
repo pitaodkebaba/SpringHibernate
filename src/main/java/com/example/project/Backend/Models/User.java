@@ -39,12 +39,15 @@ public class User implements UserDetails {
     private String password;
     @CreationTimestamp
     @Column(nullable = false, name = "created_at")
+    @JsonIgnore
     private Date createdAt;
     @CreationTimestamp
     @Column(nullable = false, name = "updated_at")
+    @JsonIgnore
     private Date updatedAt;
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
+    @JsonIgnore
     private Role role;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)

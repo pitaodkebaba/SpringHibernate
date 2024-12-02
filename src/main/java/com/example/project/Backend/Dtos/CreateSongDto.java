@@ -1,6 +1,7 @@
 package com.example.project.Backend.Dtos;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 @Data
@@ -11,6 +12,6 @@ public class CreateSongDto {
     private String artist;
     @NotBlank(message = "Album is mandatory")
     private String album;
-    @NotBlank(message = "Genre Id is mandatory")
+    @NotNull(message = "Genre is mandatory")
     private int genreId;
 }

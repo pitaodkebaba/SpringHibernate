@@ -39,13 +39,24 @@ public class PlaylistService {
                 .collect(Collectors.toList());
     }
 
-    public Optional<Playlist> getPlaylistById(int id) {
+    public List<Playlist> getPlaylistsByCurrentUser() {
+        try {
+            User user = userService.authencticatedUser();
+            return playlistRepository.findAllByUser(user);
+        } catch (Exception e) {
+            throw new EntityNotFoundException("You do not have any playlists");
+        }
+    }
+
+    public Optional<Playlist> getPlaylistById(int id) throws AccessDeniedException {
         try {
             User user = userService.authencticatedUser();
             if (playlistRepository.findById(id).get().getUser().getId() != user.getId()) {
                 throw new AccessDeniedException("This playlist does not belong to you");
             }
             return playlistRepository.findById(id);
+        } catch (AccessDeniedException e) {
+            throw new AccessDeniedException(e.getMessage());
         } catch (Exception e) {
             throw new EntityNotFoundException("Playlist with id: " + id + " not found");
         }
@@ -72,13 +83,15 @@ public class PlaylistService {
         playlistRepository.save(playlist);
     }
 
-    public void deletePlaylist(int id){
+    public void deletePlaylist(int id) throws AccessDeniedException {
         try {
             User user = userService.authencticatedUser();
             if (playlistRepository.findById(id).get().getUser().getId() != user.getId()) {
                 throw new AccessDeniedException("This playlist does not belong to you");
             }
             playlistRepository.deleteById(id);
+        } catch (AccessDeniedException e) {
+            throw new AccessDeniedException(e.getMessage());
         } catch (Exception e) {
             throw new EntityNotFoundException("Playlist with id: " + id + " not found");
         }

@@ -41,4 +41,11 @@ public class SongController {
         return ResponseEntity.ok(response);
     }
 
+    @GetMapping("/{id}")
+    public ResponseEntity<SuccessResponse<Song>> getSongById(@PathVariable int id) {
+        Song song = songService.getSongById(id).orElseThrow();
+        SuccessResponse<Song> response = new SuccessResponse<>("Success", "Song with id: " + id + " retrieved successfully", song);
+        return ResponseEntity.ok(response);
+    }
+
 }

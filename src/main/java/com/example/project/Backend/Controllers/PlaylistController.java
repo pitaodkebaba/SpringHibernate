@@ -30,8 +30,15 @@ public class PlaylistController {
         return ResponseEntity.ok(response);
     }
 
+    @GetMapping("/me")
+    public ResponseEntity<SuccessResponse<List<Playlist>>> getMyPlaylists(){
+        List<Playlist> playlists = playlistService.getPlaylistsByCurrentUser();
+        SuccessResponse<List<Playlist>> response = new SuccessResponse<>("Success", "Your retrieved successfully", playlists);
+        return ResponseEntity.ok(response);
+    }
+
     @GetMapping("/{id}")
-    public ResponseEntity<?> getPlaylistById(@PathVariable int id) {
+    public ResponseEntity<?> getPlaylistById(@PathVariable int id) throws AccessDeniedException {
         Optional<Playlist> playlist = playlistService.getPlaylistById(id);
         SuccessResponse<Optional<Playlist>> response = new SuccessResponse<>("Success", "Playlist retrieved successfully", playlist);
         return ResponseEntity.ok(response);
@@ -53,7 +60,7 @@ public class PlaylistController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> deletePlaylist(@PathVariable int id) {
+    public ResponseEntity<?> deletePlaylist(@PathVariable int id) throws AccessDeniedException {
         playlistService.deletePlaylist(id);
         SuccessResponse<Void> response = new SuccessResponse<>("Success", "Playlist deleted successfully", null);
         return ResponseEntity.ok(response);
