@@ -24,9 +24,9 @@ public class PlaylistController {
     private final UserService userService;
 
     @GetMapping
-    public ResponseEntity<SuccessResponse<List<PlaylistResponse>>> getPlaylists() {
-        List<PlaylistResponse> playlists = playlistService.getPlaylists();
-        SuccessResponse<List<PlaylistResponse>> response = new SuccessResponse<>("Success", "Playlists retrieved successfully", playlists);
+    public ResponseEntity<SuccessResponse<List<? extends PlaylistResponse>>> getPlaylists() {
+        List<? extends PlaylistResponse> playlists = playlistService.getPlaylists();
+        SuccessResponse<List<? extends PlaylistResponse>> response = new SuccessResponse<>("Success", "Playlists retrieved successfully", playlists);
         return ResponseEntity.ok(response);
     }
 

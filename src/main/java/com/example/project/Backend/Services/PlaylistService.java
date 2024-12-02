@@ -8,9 +8,12 @@ import com.example.project.Backend.Models.User;
 import com.example.project.Backend.Repositories.PlaylistRepository;
 import com.example.project.Backend.Repositories.SongRepository;
 import com.example.project.Backend.Repositories.UserRepository;
+import com.example.project.Backend.Responses.AdminPlaylistResponse;
 import com.example.project.Backend.Responses.PlaylistResponse;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.AllArgsConstructor;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,16 +30,19 @@ public class PlaylistService {
     private final UserRepository userRepository;
     private final UserService userService;
 
-    public List<PlaylistResponse> getPlaylists() {
-        return playlistRepository.findAll().stream()
-                .map(playlist -> {
-                    PlaylistResponse response = new PlaylistResponse();
-                    response.setName(playlist.getName());
-                    response.setOwner(playlist.getUser().getUsername());
-                    response.setSongs(playlist.getSongs().stream().map(Song::getTitle).collect(Collectors.toList()));
-                    return response;
-                })
-                .collect(Collectors.toList());
+    public List<? extends PlaylistResponse> getPlaylists() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        User user = (User) authentication.getPrincipal();
+
+        if (user.getAuthorities().stream().anyMatch(auth -> auth.getAuthority().equals("ADMIN"))) {
+            return playlistRepository.findAll().stream()
+                    .map(this::convertToAdminResponse)
+                    .collect(Collectors.toList());
+        } else {
+            return playlistRepository.findAll().stream()
+                    .map(this::convertToResponse)
+                    .collect(Collectors.toList());
+        }
     }
 
     public List<Playlist> getPlaylistsByCurrentUser() {
@@ -109,5 +115,24 @@ public class PlaylistService {
         playlist.setSongs(songs);
 
         return playlist;
+    }
+
+    private PlaylistResponse convertToResponse(Playlist playlist){
+        return PlaylistResponse.builder()
+                .name(playlist.getName())
+                .owner(playlist.getUser().getUsername())
+                .songs(playlist.getSongs().stream().map(Song::getTitle).collect(Collectors.toList()))
+                .build();
+    }
+
+    private AdminPlaylistResponse convertToAdminResponse(Playlist playlist){
+        return AdminPlaylistResponse.builder()
+                .id(playlist.getId())
+                .name(playlist.getName())
+                .owner(playlist.getUser().getUsername())
+                .ownerId(playlist.getUser().getId())
+                .ownerRole(User.Role.valueOf(playlist.getUser().getRole().name()))
+                .songs(playlist.getSongs().stream().map(Song::getTitle).collect(Collectors.toList()))
+                .build();
     }
 }
