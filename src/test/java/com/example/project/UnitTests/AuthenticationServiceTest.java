@@ -5,6 +5,7 @@ import com.example.project.Backend.Dtos.RegisterUserDto;
 import com.example.project.Backend.Models.User;
 import com.example.project.Backend.Repositories.UserRepository;
 import com.example.project.Backend.Services.AuthenticationService;
+import com.example.project.Backend.Services.CustomPasswordEncoder;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -25,7 +26,7 @@ class AuthenticationServiceTest {
     private UserRepository userRepository;
 
     @Mock
-    private PasswordEncoder passwordEncoder;
+    private CustomPasswordEncoder passwordEncoder;
 
     @Mock
     private AuthenticationManager authenticationManager;

@@ -1,7 +1,5 @@
 package com.example.project;
 
-import com.example.project.Frontend.MainApp;
-import javafx.application.Application;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 

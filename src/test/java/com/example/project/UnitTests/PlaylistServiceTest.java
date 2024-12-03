@@ -6,6 +6,8 @@ import com.example.project.Backend.Models.User;
 import com.example.project.Backend.Repositories.PlaylistRepository;
 import com.example.project.Backend.Repositories.SongRepository;
 import com.example.project.Backend.Repositories.UserRepository;
+import com.example.project.Backend.Responses.AdminPlaylistResponse;
+import com.example.project.Backend.Responses.PlaylistResponse;
 import com.example.project.Backend.Services.PlaylistService;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -14,9 +16,14 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.util.Collections;
+import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -32,19 +39,64 @@ public class PlaylistServiceTest {
     @Mock
     private UserRepository userRepository;
 
+    @Mock
+    private SecurityContext securityContext;
+
+    @Mock
+    private Authentication authentication;
+
     @InjectMocks
     private PlaylistService playlistService;
 
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
+        SecurityContextHolder.setContext(securityContext);
     }
 
     @Test
-    @DisplayName("All playlists retrieval")
-    void shouldGetAllPlaylists() {
-        playlistService.getPlaylists();
+    @DisplayName("All playlists retrieval for admin")
+    void shouldGetAllPlaylistsForAdmin() {
+        User admin = new User();
+        admin.setRole(User.Role.ADMIN);
 
+        when(securityContext.getAuthentication()).thenReturn(authentication);
+        when(authentication.getPrincipal()).thenReturn(admin);
+
+        List<Playlist> playlists = List.of(new Playlist(), new Playlist());
+        playlists.get(0).setUser(admin);
+        playlists.get(1).setUser(admin);
+        playlists.get(0).setSongs(Collections.emptyList());
+        playlists.get(1).setSongs(Collections.emptyList());
+        when(playlistRepository.findAll()).thenReturn(playlists);
+
+        List<? extends PlaylistResponse> result = playlistService.getPlaylists();
+
+        assertEquals(2, result.size());
+        assertEquals(AdminPlaylistResponse.class, result.get(0).getClass());
+        verify(playlistRepository, times(1)).findAll();
+    }
+
+    @Test
+    @DisplayName("All playlists retrieval for user")
+    void shouldGetAllPlaylistsForUser() {
+        User user = new User();
+        user.setRole(User.Role.USER);
+
+        when(securityContext.getAuthentication()).thenReturn(authentication);
+        when(authentication.getPrincipal()).thenReturn(user);
+
+        List<Playlist> playlists = List.of(new Playlist(), new Playlist());
+        playlists.get(0).setUser(user);
+        playlists.get(1).setUser(user);
+        playlists.get(0).setSongs(Collections.emptyList());
+        playlists.get(1).setSongs(Collections.emptyList());
+        when(playlistRepository.findAll()).thenReturn(playlists);
+
+        List<? extends PlaylistResponse> result = playlistService.getPlaylists();
+
+        assertEquals(2, result.size());
+        assertEquals(PlaylistResponse.class, result.get(0).getClass());
         verify(playlistRepository, times(1)).findAll();
     }
 
