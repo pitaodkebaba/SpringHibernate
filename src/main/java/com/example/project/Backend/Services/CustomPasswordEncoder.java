@@ -14,11 +14,11 @@ public class CustomPasswordEncoder implements PasswordEncoder {
 
     @Override
     public String encode(CharSequence rawPassword) {
-        return encoder.encode(pepper + rawPassword);
+        return encoder.encode(rawPassword);
     }
 
     @Override
     public boolean matches(CharSequence rawPassword, String encodedPassword) {
-        return encoder.matches(pepper + rawPassword, encodedPassword);
+        return encoder.matches(rawPassword, encodedPassword);
     }
 }

@@ -1,8 +1,10 @@
 package com.example.project.Backend.Configs;
 
+import com.example.project.Backend.Models.User;
 import com.example.project.Backend.Repositories.UserRepository;
 import com.example.project.Backend.Services.CustomUserDetailService;
 import lombok.AllArgsConstructor;
+import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -18,7 +20,7 @@ public class ApplicationConfiguration {
     private final CustomUserDetailService customUserDetailService;
 
     @Bean
-    BCryptPasswordEncoder passwordEncoder() {
+    public BCryptPasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
@@ -35,5 +37,20 @@ public class ApplicationConfiguration {
         authProvider.setPasswordEncoder(passwordEncoder());
 
         return authProvider;
+    }
+
+    @Bean
+    public CommandLineRunner createDefaultAdmin(UserRepository userRepository, BCryptPasswordEncoder passwordEncoder) {
+        return args -> {
+            if (userRepository.findByUsername("admin").isEmpty()) {
+                User admin = User.builder()
+                        .username("admin")
+                        .email("admin@localhost")
+                        .password(passwordEncoder.encode("admin"))
+                        .role(User.Role.ADMIN)
+                        .build();
+                userRepository.save(admin);
+            }
+        };
     }
 }
