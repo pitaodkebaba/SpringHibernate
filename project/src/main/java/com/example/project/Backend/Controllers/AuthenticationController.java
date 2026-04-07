@@ -7,7 +7,6 @@ import com.example.project.Backend.Responses.LoginResponse;
 import com.example.project.Backend.Services.AuthenticationService;
 import com.example.project.Backend.Services.JwtService;
 import jakarta.validation.Valid;
-import io.swagger.v3.oas.annotations.security.SecurityRequirements;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -15,7 +14,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@SecurityRequirements
 @RequestMapping("/auth")
 public class AuthenticationController {
     private final JwtService jwtService;
