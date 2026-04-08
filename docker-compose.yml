@@ -1,4 +1,13 @@
 services:
+  frontend:
+    image: frontend:secure
+    build:
+      context: "./frontend" 
+      dockerfile: "../frontend.Dockerfile"
+    ports:
+      - "80:8080" # Przekierowujemy port 80 z hosta na bezpieczny port 8080 w kontenerze
+    depends_on:
+      - backend
   backend:
     image: backend
     build:
@@ -12,7 +21,7 @@ services:
 #    networks:
 #        - app-network
   db:
-    image: db:latest
+    image: db
     build:
       context: "./Database"
       dockerfile: "../database.Dockerfile"
