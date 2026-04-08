@@ -8,6 +8,49 @@ Zgodnie z wymaganiami projektu, poniżej przedstawiono architekturę aplikacji:
 * **Backend**: Mikroserwis REST API zbudowany w Spring Boot 3, wykorzystujący Java 21 i Maven.
 * **Database**: Baza danych MySQL 8.0 do przechowywania informacji o użytkownikach, piosenkach i playlistach.
 
+```mermaid
+graph TD
+    %% Sekcja Klienta
+    subgraph "Urządzenie Użytkownika (Zewnątrz)"
+        Client[Przeglądarka Internetowa]
+        ReactApp[Uruchomiona Aplikacja React<br/>w pamięci przeglądarki]
+        Client --- ReactApp
+    end
+    
+    %% Sekcja Serwera
+    subgraph "Docker / Minikube (Wewnętrzna Sieć)"
+        Nginx[API Gateway<br/>Nginx]
+        ReactContainer[Kontener Frontend<br/>Przechowalnia plików HTML/JS]
+        Backend[Backend<br/>Spring Boot]
+        Redis[(Redis<br/>Cache)]
+        MySQL[(MySQL<br/>Baza Danych)]
+    end
+
+    %% PRZEPŁYW 1: POBIERANIE STRONY
+    Client -.->|1. Użytkownik wpisuje adres localhost| Nginx
+    Nginx -.->|Szuka plików na ścieżce '/'| ReactContainer
+    ReactContainer -.->|Zwraca gotowy interfejs do przeglądarki| Client
+
+    %% PRZEPŁYW 2: KOMUNIKACJA Z API (To o co pytałeś)
+    ReactApp ==>|2. axios/fetch uderza na '/api/songs'| Nginx
+    Nginx ==>|Przekazuje ruch prosto do Javy| Backend
+    Backend ==>|Zwraca dane w formacie JSON| Nginx
+    Nginx ==>|Przesyła JSON do Reacta| ReactApp
+
+    %% Backend Logika
+    Backend -->|Odczyt z Cache| Redis
+    Backend -->|Odczyt/Zapis do Bazy| MySQL
+
+    %% Kolory
+    style Client fill:#e6f3ff,stroke:#333,stroke-width:2px
+    style ReactApp fill:#61dafb,stroke:#333,stroke-width:2px,color:#000
+    style Nginx fill:#ffcccb,stroke:#333,stroke-width:2px
+    style ReactContainer fill:#f9f9f9,stroke:#333,stroke-dasharray: 5 5
+    style Backend fill:#d5e8d4,stroke:#333,stroke-width:2px
+    style Redis fill:#ffe6cc,stroke:#333,stroke-width:2px
+    style MySQL fill:#fff2cc,stroke:#333,stroke-width:2px
+```
+
 > **Zadanie 1.6**: Graficzna reprezentacja architektury wygenerowana przez `compose-viz` znajdzie się w pliku `architektura.png`.
 
 ## 2. Repozytoria DockerHub
