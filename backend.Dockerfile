@@ -1,4 +1,4 @@
-FROM jelastic/maven:3.9.8-openjdk-21.0.2-almalinux-9 AS build-stage
+FROM maven:3.9-eclipse-temurin-21 AS build-stage
 
 WORKDIR /app
 
