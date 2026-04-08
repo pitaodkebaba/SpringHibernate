@@ -21,45 +21,45 @@ export default function Register() {
       });
 
       if (response.ok) {
-        setMessage('Rejestracja przebiegła pomyślnie! Możesz się zalogować.');
+        setMessage('Registration successful! You can now log in.');
         setUsername('');
         setEmail('');
         setPassword('');
       } else {
-        setMessage('Błąd podczas rejestracji. Sprawdź poprawność danych.');
+        setMessage('Error during registration. Please check your details.');
       }
     } catch (error) {
-      console.error('Błąd połączenia:', error);
-      setMessage('Błąd połączenia z serwerem.');
+      console.error('Error connecting:', error);
+      setMessage('Error connecting to the server.');
     }
   };
 
   return (
     <div style={{ maxWidth: '300px', margin: 'auto', padding: '20px' }}>
-      <h2>Rejestracja</h2>
+      <h2>Register</h2>
       <form onSubmit={handleRegister} style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
         <input
           type="text"
-          placeholder="Nazwa użytkownika"
+          placeholder="Username"
           value={username}
           onChange={(e) => setUsername(e.target.value)}
           required
         />
         <input
           type="email"
-          placeholder="Adres e-mail"
+          placeholder="Email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           required
         />
         <input
           type="password"
-          placeholder="Hasło"
+          placeholder="Password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           required
         />
-        <button type="submit">Zarejestruj się</button>
+        <button type="submit">Register</button>
       </form>
       {message && <p>{message}</p>}
     </div>

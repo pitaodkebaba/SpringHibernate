@@ -1,6 +1,6 @@
 import { useState } from 'react';
 
-export default function Login() {
+export default function Login({ onLoginSuccess }) {
   // Stany odpowiadające polom z LoginUserDto
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -23,35 +23,36 @@ export default function Login() {
         const data = await response.json();
         // Zapisujemy token JWT do localStorage, aby używać go w przyszłych zapytaniach
         localStorage.setItem('token', data.token);
-        setMessage('Zalogowano pomyślnie!');
+        setMessage('Login successful!');
+        if (onLoginSuccess) onLoginSuccess();
       } else {
-        setMessage('Błędny login lub hasło.');
+        setMessage('Invalid username or password.');
       }
     } catch (error) {
-      console.error('Błąd połączenia:', error);
-      setMessage('Błąd połączenia z serwerem.');
+      console.error('Error connecting:', error);
+      setMessage('Error connecting to the server.');
     }
   };
 
   return (
     <div style={{ maxWidth: '300px', margin: 'auto', padding: '20px' }}>
-      <h2>Logowanie</h2>
+      <h2>Login</h2>
       <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
         <input
           type="text"
-          placeholder="Nazwa użytkownika"
+          placeholder="Username"
           value={username}
           onChange={(e) => setUsername(e.target.value)}
           required
         />
         <input
           type="password"
-          placeholder="Hasło"
+          placeholder="Password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           required
         />
-        <button type="submit">Zaloguj się</button>
+        <button type="submit">Login</button>
       </form>
       {message && <p>{message}</p>}
     </div>
