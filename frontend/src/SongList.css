@@ -1,0 +1,145 @@
+/* SongList.css */
+
+.songlist-container {
+  background-color: #121212;
+  color: #ffffff;
+  min-height: 100vh;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.songlist-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 40px;
+  background: linear-gradient(180deg, rgba(30,30,30,1) 0%, rgba(18,18,18,1) 100%);
+  border-bottom: 1px solid #282828;
+}
+
+.songlist-header h1 {
+  margin: 0;
+  font-size: 28px;
+  letter-spacing: -1px;
+}
+
+.songlist-logout-btn {
+  background-color: #1db954;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 20px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.songlist-logout-btn:hover {
+  transform: scale(1.05);
+}
+
+.songlist-content {
+  padding: 30px 40px;
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.songlist-content h2 {
+  font-size: 24px;
+  margin-bottom: 20px;
+  color: #fff;
+}
+
+.songlist-table-header {
+  display: flex;
+  padding: 0 20px 10px 90px;
+  color: #b3b3b3;
+  font-size: 14px;
+  border-bottom: 1px solid #282828;
+  margin-bottom: 20px;
+}
+
+.songlist-table-header > div {
+  flex: 2;
+}
+
+.songlist-empty {
+  color: #b3b3b3;
+  text-align: center;
+  margin-top: 40px;
+}
+
+/* Wiersz z piosenką */
+.songlist-item {
+  display: flex;
+  align-items: center;
+  padding: 12px 20px;
+  border-radius: 8px;
+  background-color: transparent;
+  transition: background-color 0.3s ease;
+  cursor: pointer;
+  margin-bottom: 8px;
+}
+
+.songlist-item:hover {
+  background-color: #2a2a2a;
+}
+
+.songlist-cover {
+  width: 50px;
+  height: 50px;
+  background-color: #282828;
+  border-radius: 4px;
+  margin-right: 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: #b3b3b3;
+  font-size: 24px;
+}
+
+.songlist-info-col {
+  flex: 2;
+  display: flex;
+  flex-direction: column;
+}
+
+.songlist-title {
+  font-size: 16px;
+  font-weight: 500;
+  color: #e0e0e0;
+  transition: color 0.2s ease;
+}
+
+/* Kiedy najedziesz na wiersz, zmień kolor tytułu na biały */
+.songlist-item:hover .songlist-title {
+  color: #fff;
+}
+
+.songlist-artist {
+  flex: 2;
+  color: #b3b3b3;
+  font-size: 14px;
+}
+
+/* Kolumna z przyciskiem Play jest domyślnie niewidoczna (opacity: 0) */
+.songlist-play-col {
+  width: 40px;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+/* Kiedy najedziesz na wiersz, pokaż przycisk Play */
+.songlist-item:hover .songlist-play-col {
+  opacity: 1;
+}
+
+.songlist-play-btn {
+  background: none;
+  border: none;
+  color: #1db954;
+  font-size: 24px;
+  cursor: pointer;
+}
