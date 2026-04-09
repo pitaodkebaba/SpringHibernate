@@ -143,3 +143,113 @@
   font-size: 24px;
   cursor: pointer;
 }
+
+/* --- STYLE DLA PANELU ADMINA --- */
+
+.songlist-action-btn {
+  background-color: transparent;
+  color: #fff;
+  border: 1px solid #b3b3b3;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.songlist-action-btn:hover {
+  border-color: #fff;
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.songlist-admin-form {
+  background-color: #181818;
+  padding: 20px;
+  border-radius: 8px;
+  margin-bottom: 30px;
+  border: 1px solid #282828;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.songlist-admin-form h3 {
+  margin-top: 0;
+  margin-bottom: 5px;
+  color: #fff;
+}
+
+.songlist-admin-form input {
+  padding: 12px;
+  border-radius: 4px;
+  border: 1px solid #333;
+  background-color: #282828;
+  color: #fff;
+  font-size: 16px;
+}
+
+.songlist-admin-form input:focus {
+  outline: none;
+  border-color: #1db954;
+}
+
+.songlist-submit-btn {
+  background-color: #1db954;
+  color: #fff;
+  border: none;
+  padding: 12px;
+  border-radius: 20px;
+  font-weight: bold;
+  font-size: 16px;
+  cursor: pointer;
+  margin-top: 10px;
+  transition: transform 0.2s;
+}
+
+.songlist-submit-btn:hover {
+  transform: scale(1.02);
+}
+
+.songlist-admin-actions {
+  flex: 1;
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.songlist-item:hover .songlist-admin-actions {
+  opacity: 1;
+}
+
+.edit-btn, .delete-btn {
+  background: none;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s;
+}
+
+.edit-btn {
+  color: #b3b3b3;
+}
+
+.edit-btn:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: #fff;
+}
+
+.delete-btn {
+  color: #e22134;
+}
+
+.delete-btn:hover {
+  background-color: rgba(226, 33, 52, 0.15);
+}

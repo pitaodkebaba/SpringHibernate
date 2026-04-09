@@ -110,7 +110,7 @@ public class SongServiceTest {
         createSongDto.setTitle("Test Song");
         createSongDto.setArtist("Test Artist");
         createSongDto.setAlbum("Test Album");
-        createSongDto.setGenreId(1);
+        createSongDto.setGenreName("Test Genre");
 
         when(songRepository.existsByTitleAndAlbum(anyString(), anyString())).thenReturn(false);
         when(genreRepository.findById(anyInt())).thenReturn(Optional.of(new Genre()));
@@ -127,7 +127,7 @@ public class SongServiceTest {
         createSongDto.setTitle("Test Song");
         createSongDto.setArtist("Test Artist");
         createSongDto.setAlbum("Test Album");
-        createSongDto.setGenreId(1);
+        createSongDto.setGenreName("Test Genre");
 
         when(songRepository.existsByTitleAndAlbum(anyString(), anyString())).thenReturn(true);
 
