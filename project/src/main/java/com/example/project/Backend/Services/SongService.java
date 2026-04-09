@@ -1,6 +1,7 @@
 package com.example.project.Backend.Services;
 
 import com.example.project.Backend.Dtos.CreateSongDto;
+import com.example.project.Backend.Models.Genre;
 import com.example.project.Backend.Models.Song;
 import com.example.project.Backend.Models.User;
 import com.example.project.Backend.Repositories.GenreRepository;
@@ -50,6 +51,7 @@ public class SongService {
         songRepository.save(convertToEntity(song));
     }
 
+    @Transactional
     public void updateSong(int id, CreateSongDto song) {
         if (!songRepository.existsById(id)) {
             throw new IllegalArgumentException("Song with id: " + id + " not found");
@@ -58,7 +60,7 @@ public class SongService {
         songToUpdate.setTitle(song.getTitle());
         songToUpdate.setArtist(song.getArtist());
         songToUpdate.setAlbum(song.getAlbum());
-        songToUpdate.setGenre(genreRepository.findById(song.getGenreId()).orElseThrow());
+        songToUpdate.setGenre(getOrCreateGenre(song.getGenreName()));
         songRepository.save(songToUpdate);
     }
 
@@ -69,12 +71,21 @@ public class SongService {
         songRepository.delete(songRepository.findById(id).orElseThrow());
     }
 
+    private Genre getOrCreateGenre(String genreName) {
+        return genreRepository.findByName(genreName)
+                .orElseGet(() -> {
+                    Genre newGenre = new Genre();
+                    newGenre.setName(genreName);
+                    return genreRepository.save(newGenre);
+                });
+    }
+
     public CreateSongDto convertToDto(Song song) {
         CreateSongDto createSongDto = new CreateSongDto();
         createSongDto.setTitle(song.getTitle());
         createSongDto.setArtist(song.getArtist());
         createSongDto.setAlbum(song.getAlbum());
-        createSongDto.setGenreId(song.getGenre().getId());
+        createSongDto.setGenreName(song.getGenre().getName());
         return createSongDto;
     }
 
@@ -83,7 +94,7 @@ public class SongService {
         song.setTitle(createSongDto.getTitle());
         song.setArtist(createSongDto.getArtist());
         song.setAlbum(createSongDto.getAlbum());
-        song.setGenre(genreRepository.findById(createSongDto.getGenreId()).orElseThrow());
+        song.setGenre(getOrCreateGenre(createSongDto.getGenreName()));
         return song;
     }
 
