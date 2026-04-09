@@ -4,50 +4,53 @@
 
 Zgodnie z wymaganiami projektu, poniżej przedstawiono architekturę aplikacji:
 
+* **API Gateway**: Mikroserwis bazujący na Spring Cloud Gateway. Służy jako pojedynczy punkt wejścia, zajmuje się routingiem, limitowaniem zapytań (Rate Limiting) oraz obsługą awarii (Circuit Breaker).
 * **Frontend**: Aplikacja Single Page Application (SPA) oparta na React + Vite, serwowana przez Nginx (obraz unprivileged).
 * **Backend**: Mikroserwis REST API zbudowany w Spring Boot 3, wykorzystujący Java 21 i Maven.
-* **Database**: Baza danych MySQL 8.0 do przechowywania informacji o użytkownikach, piosenkach i playlistach.
+* **Database (MySQL)**: Baza danych 8.0 do przechowywania informacji o użytkownikach, piosenkach i playlistach.
+* **Cache (Redis)**: Baza in-memory wspierająca działanie mechanizmu Rate Limitingu na bramie API.
 
 ```mermaid
 graph TD
     %% Sekcja Klienta
-    subgraph "Urządzenie Użytkownika (Zewnątrz)"
-        Client[Przeglądarka Internetowa]
-        ReactApp[Uruchomiona Aplikacja React<br/>w pamięci przeglądarki]
+    subgraph Zewnatrz [Urzadzenie Uzytkownika]
+        Client[Przegladarka Internetowa]
+        ReactApp[Uruchomiona Aplikacja React<br/>w pamieci przegladarki]
         Client --- ReactApp
     end
-    
-    %% Sekcja Serwera
-    subgraph "Docker / Minikube (Wewnętrzna Sieć)"
-        Nginx[API Gateway<br/>Nginx]
-        ReactContainer[Kontener Frontend<br/>Przechowalnia plików HTML/JS]
+  
+    %% Sekcja Serwera (Wewnetrzna Siec)
+    subgraph Wewnatrz [Docker Wewnetrzna Siec app-network]
+        Gateway[API Gateway<br/>Spring Cloud]
+        Frontend[Frontend<br/>Nginx]
         Backend[Backend<br/>Spring Boot]
-        Redis[(Redis<br/>Cache)]
+        Redis[(Redis<br/>Rate Limiting)]
         MySQL[(MySQL<br/>Baza Danych)]
     end
 
-    %% PRZEPŁYW 1: POBIERANIE STRONY
-    Client -.->|1. Użytkownik wpisuje adres localhost| Nginx
-    Nginx -.->|Szuka plików na ścieżce '/'| ReactContainer
-    ReactContainer -.->|Zwraca gotowy interfejs do przeglądarki| Client
+    %% Punkt wejscia
+    Client -.->|Ruch HTTP na port 80| Gateway
 
-    %% PRZEPŁYW 2: KOMUNIKACJA Z API (To o co pytałeś)
-    ReactApp ==>|2. axios/fetch uderza na '/api/songs'| Nginx
-    Nginx ==>|Przekazuje ruch prosto do Javy| Backend
-    Backend ==>|Zwraca dane w formacie JSON| Nginx
-    Nginx ==>|Przesyła JSON do Reacta| ReactApp
+    %% PRZEPLYW 1: POBIERANIE STRONY
+    Gateway -.->|Routing sciezki uzytkownika| Frontend
+    Frontend -.->|Zwraca skompilowane pliki React JS, CSS, HTML| Client
+
+    %% PRZEPLYW 2: KOMUNIKACJA Z API I LOGOWANIEM
+    ReactApp ==>|Wysyla zapytania na API lub AUTH| Gateway
+    Gateway <-->|Weryfikacja zapytan - Rate Limiting| Redis
+    Gateway ==>|Przekazuje ruch do Javy| Backend
+    Backend ==>|Zwraca JSON lub blad 503| ReactApp
 
     %% Backend Logika
-    Backend -->|Odczyt z Cache| Redis
-    Backend -->|Odczyt/Zapis do Bazy| MySQL
+    Backend <-->|Zapis i Odczyt Danych| MySQL
 
-    %% Kolory
+    %% Kolory i style
     style Client fill:#e6f3ff,stroke:#333,stroke-width:2px
     style ReactApp fill:#61dafb,stroke:#333,stroke-width:2px,color:#000
-    style Nginx fill:#ffcccb,stroke:#333,stroke-width:2px
-    style ReactContainer fill:#f9f9f9,stroke:#333,stroke-dasharray: 5 5
+    style Gateway fill:#ff9999,stroke:#333,stroke-width:2px,color:#000
+    style Frontend fill:#f9f9f9,stroke:#333,stroke-width:2px
     style Backend fill:#d5e8d4,stroke:#333,stroke-width:2px
-    style Redis fill:#ffe6cc,stroke:#333,stroke-width:2px
+    style Redis fill:#ffcc99,stroke:#333,stroke-width:2px
     style MySQL fill:#fff2cc,stroke:#333,stroke-width:2px
 ```
 
@@ -57,6 +60,7 @@ graph TD
 
 Obrazy są budowane jako wieloarchitekturowe (`linux/amd64`, `linux/arm64`) i zawierają wbudowane informacje SBOM.
 
+* **Api Gateway**: *(Link zostanie dodany po przesłaniu obrazu)*
 * **Backend**: [Link do DockerHub - pitaodkebaba/backend](https://hub.docker.com/r/pitaodkebaba/backend)
 * **Frontend**: *(Link zostanie dodany po przesłaniu obrazu)*
 * **Database**: *(Link zostanie dodany po przesłaniu obrazu)*
@@ -71,6 +75,14 @@ Wszystkie obrazy zostały opracowane zgodnie z wytycznymi bezpieczeństwa i opty
 
 ## 4. Analiza Podatności (Trivy)
 
+Obrazy zostały poddane skanowaniu na obecność luk w zabezpieczeniach narzędziem Trivy.
+Szczegółowe raporty i uzasadnienia dla ewentualnych podatności (m.in. w obrazach bazowych Javy) znajdują się w plikach:
+
+* `backend_scan.md`
+* `gateway_scan.md`
+
+Ewentualne luki w serwerach wbudowanych mają zminimalizowany wektor ataku, ponieważ aplikacje są ukryte w wirtualnej podsieci Dockera i nie są wystawione bezpośrednio na świat
+
 ## 5. SBOM (Software Bill of Materials)
 
 Informacje SBOM zostały osadzone w obrazach za pomocą flagi `--sbom=true`. Dowód obecności manifestu można zweryfikować komendą:
@@ -84,5 +96,12 @@ Aplikację można uruchomić lokalnie za pomocą Docker Compose:
 docker-compose up -d
 ```
 
-Frontend dostępny jest pod adresem: `http://localhost`  
-Backend (API) dostępny jest pod adresem: `http://localhost:8080`
+Frontend dostępny jest pod adresem: `http://localhost`
+Backend (API): Ruch kierowany przez Gateway, np. `http://localhost/api/songs` lub `http://localhost/auth/login`. Bezpośredni port 8080 do backendu jest celowo zamknięty dla bezpieczeństwa hosta.
+
+## 7. Dodatkowe Zabezpieczenia API Gateway
+
+W ramach podnoszenia poziomu bezpieczeństwa procesów integracji i środowiska rozproszonego, wprowadzono następujące mechanizmy ochronne na bramie API:
+
+* **Rate Limiting**: Używając bazy Redis, nałożono limit żądań na ścieżki logowania i rejestracji `(/auth/**)`, co skutecznie zapobiega atakom słownikowym (brute-force) oraz obciążeniowym (DDoS). Po przekroczeniu limitu system natychmiast zwraca `429 Too Many Requests`.
+* **Circuit Breaker (Bezpiecznik)**: Wykorzystując bibliotekę Resilience4j, Gateway monitoruje stan backendu. W przypadku awarii lub timeoutu, brama odcina ruch i serwuje sformatowaną odpowiedź zapasową (Fallback) ze statusem `503 Service Unavailable`, zapobiegając kaskadowym awariom systemu. Frontend jest przygotowany do przechwytywania i wyświetlania tego błędu użytkownikowi.
