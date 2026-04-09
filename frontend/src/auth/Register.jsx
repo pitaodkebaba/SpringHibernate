@@ -1,14 +1,16 @@
 import { useState } from 'react';
 
 export default function Register() {
-  // Stany odpowiadające polom z RegisterUserDto
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [message, setMessage] = useState('');
+  const [isError, setIsError] = useState(false); 
 
   const handleRegister = async (e) => {
-    e.preventDefault(); // Zatrzymuje przeładowanie strony po wysłaniu formularza
+    e.preventDefault();
+    setMessage('Rejestracja...'); 
+    setIsError(false);
 
     try {
       const response = await fetch('/auth/signup', {
@@ -16,21 +18,32 @@ export default function Register() {
         headers: {
           'Content-Type': 'application/json',
         },
-        // Tworzymy JSON zgodny z Twoim RegisterUserDto
         body: JSON.stringify({ username, email, password }),
       });
 
       if (response.ok) {
         setMessage('Registration successful! You can now log in.');
+        setIsError(false); 
         setUsername('');
         setEmail('');
         setPassword('');
       } else {
-        setMessage('Error during registration. Please check your details.');
+        setIsError(true);
+        try {
+          const errorData = await response.json();
+          if (errorData && errorData.error) {
+            setMessage(errorData.error);
+          } else {
+            setMessage('Błąd podczas rejestracji. Sprawdź poprawność danych.');
+          }
+        } catch (parseError) {
+          setMessage(`Błąd serwera (Status: ${response.status})`);
+        }
       }
     } catch (error) {
-      console.error('Error connecting:', error);
-      setMessage('Error connecting to the server.');
+      console.error('Błąd połączenia fetch:', error);
+      setIsError(true);
+      setMessage('Brak połączenia z serwerem Gateway.');
     }
   };
 
@@ -61,7 +74,12 @@ export default function Register() {
         />
         <button type="submit">Register</button>
       </form>
-      {message && <p>{message}</p>}
+      {/* Wyświetlanie wiadomości (czerwona dla błędów, zielona dla sukcesu) */}
+      {message && (
+        <p style={{ color: isError ? '#e22134' : '#1db954', marginTop: '15px', fontWeight: 'bold', textAlign: 'center' }}>
+          {message}
+        </p>
+      )}
     </div>
   );
 }

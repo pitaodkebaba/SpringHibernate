@@ -15,8 +15,6 @@ public class ApiGatewayApplication {
         SpringApplication.run(ApiGatewayApplication.class, args);
     }
 
-    // Tworzymy bean, który pobiera adres IP klienta wysyłającego zapytanie.
-    // Na podstawie tego IP Redis będzie tworzył "koszyki" z limitami.
     @Bean
     public KeyResolver ipKeyResolver() {
         return exchange -> Mono.just(

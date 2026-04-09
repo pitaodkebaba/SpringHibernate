@@ -6,7 +6,7 @@ spring:
     name: api-gateway
   data:
     redis:
-      host: redis # Nazwa z docker-compose
+      host: redis
       port: 6379
   cloud:
     gateway:
@@ -22,7 +22,7 @@ spring:
               - OPTIONS
             allowedHeaders: "*"
       routes:
-        # 1. Przekierowanie ruchu auth (z Rate Limitingiem!)
+        # Przekierowanie ruchu auth Rate Limiting + Circuit Breaker
         - id: backend-auth
           uri: http://backend:8080
           predicates:
@@ -30,24 +30,44 @@ spring:
           filters:
             - name: RequestRateLimiter
               args:
-                # Ile zapytań na sekundę użytkownik odzyskuje
                 redis-rate-limiter.replenishRate: 2
-                # Maksymalna liczba zapytań w jednym "piku" (strzale)
                 redis-rate-limiter.burstCapacity: 5
-                # Wskazanie na bean z adresem IP zdefiniowany w Javie
                 key-resolver: "#{@ipKeyResolver}"
+            - name: CircuitBreaker
+              args:
+                name: backendCircuitBreaker
+                fallbackUri: forward:/fallback
 
-        # 2. Przekierowanie ruchu API
+        # Przekierowanie ruchu API tylko z Circuit Breaker
         - id: backend-api
           uri: http://backend:8080
           predicates:
             - Path=/api/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: backendCircuitBreaker
+                fallbackUri: forward:/fallback
 
-        # 3. Frontend
+        # Frontend
         - id: frontend
           uri: http://frontend:8080
           predicates:
             - Path=/**
+
+# zasady działania bezpiecznika circuit breaker
+resilience4j:
+  circuitbreaker:
+    configs:
+      default:
+        slidingWindowSize: 10 # Analizuje ostatnie 10 zapytań
+        failureRateThreshold: 50 # Jeśli 50% z nich zawiedzie, odcina ruch
+        waitDurationInOpenState: 10s # Czeka 10 sekund przed próbą ponownego przepuszczenia ruchu
+        permittedNumberOfCallsInHalfOpenState: 3 # Wpuszcza 3 zapytania testowe, żeby sprawdzić, czy backend wstał
+  timelimiter:
+    configs:
+      default:
+        timeoutDuration: 3s # Jeśli backend nie odpowie w ciągu 3 sekund, traktuje to jako awarię
 
 management:
   endpoints:
