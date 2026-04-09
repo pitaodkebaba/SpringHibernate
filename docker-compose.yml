@@ -1,36 +1,64 @@
 services:
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    networks:
+      - app-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  api-gateway:
+    image: api-gateway
+    build:
+      context: "./apiGateway"
+      dockerfile: "../api-gateway.Dockerfile"
+    ports:
+      - "80:8080"
+    depends_on:
+      frontend:
+        condition: service_started
+      backend:
+        condition: service_started
+      redis:
+        condition: service_healthy # Gateway czeka na gotowość Redisa
+    networks:
+      - app-network
+
   frontend:
     image: frontend:secure
     build:
       context: "./frontend" 
       dockerfile: "../frontend.Dockerfile"
-    ports:
-      - "80:8080" # Przekierowujemy port 80 z hosta na bezpieczny port 8080 w kontenerze
     depends_on:
       - backend
+    networks:
+      - app-network
+
   backend:
     image: backend
     build:
       context: "./project"
       dockerfile: "../backend.Dockerfile"
-    ports:
-      - "8080:8080"
     depends_on:
       db:
         condition: service_healthy
-#    networks:
-#        - app-network
+    networks:
+      - app-network
+
   db:
     image: db
     build:
       context: "./Database"
       dockerfile: "../database.Dockerfile"
-    ports:
-      - "3306:3306"
     env_file:
         - "./Database/.env"
-#    networks:
-#      - app-network
+    networks:
+      - app-network
     volumes:
         - db-data:/var/lib/mysql
     healthcheck:
@@ -38,9 +66,12 @@ services:
         interval: 10s
         timeout: 5s
         retries: 5
-#networks:
-#  app-network:
-#    driver: bridge
+
+networks:
+  app-network:
+    driver: bridge
 
 volumes:
   db-data:
+
+  

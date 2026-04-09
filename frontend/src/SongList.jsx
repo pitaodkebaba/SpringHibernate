@@ -15,7 +15,7 @@ export default function SongList() {
         return;
       }
       try {
-        const response = await fetch('http://localhost:8080/api/songs', {
+        const response = await fetch('/api/songs', {
           method: 'GET',
           headers: {
             'Authorization': `Bearer ${token}`,

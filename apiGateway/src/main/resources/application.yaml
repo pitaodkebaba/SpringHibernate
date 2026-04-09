@@ -1,0 +1,56 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: api-gateway
+  data:
+    redis:
+      host: redis # Nazwa z docker-compose
+      port: 6379
+  cloud:
+    gateway:
+      globalcors:
+        corsConfigurations:
+          '[/**]':
+            allowedOrigins: "*"
+            allowedMethods:
+              - GET
+              - POST
+              - PUT
+              - DELETE
+              - OPTIONS
+            allowedHeaders: "*"
+      routes:
+        # 1. Przekierowanie ruchu auth (z Rate Limitingiem!)
+        - id: backend-auth
+          uri: http://backend:8080
+          predicates:
+            - Path=/auth/**
+          filters:
+            - name: RequestRateLimiter
+              args:
+                # Ile zapytań na sekundę użytkownik odzyskuje
+                redis-rate-limiter.replenishRate: 2
+                # Maksymalna liczba zapytań w jednym "piku" (strzale)
+                redis-rate-limiter.burstCapacity: 5
+                # Wskazanie na bean z adresem IP zdefiniowany w Javie
+                key-resolver: "#{@ipKeyResolver}"
+
+        # 2. Przekierowanie ruchu API
+        - id: backend-api
+          uri: http://backend:8080
+          predicates:
+            - Path=/api/**
+
+        # 3. Frontend
+        - id: frontend
+          uri: http://frontend:8080
+          predicates:
+            - Path=/**
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
