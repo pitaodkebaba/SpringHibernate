@@ -1,36 +1,48 @@
 import { useState } from 'react';
 
 export default function Login({ onLoginSuccess }) {
-  // Stany odpowiadające polom z LoginUserDto
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [message, setMessage] = useState('');
+  const [isError, setIsError] = useState(false); 
 
   const handleLogin = async (e) => {
     e.preventDefault();
+    setMessage('Logowanie...'); 
+    setIsError(false);
 
     try {
-      const response = await fetch('http://localhost:8080/auth/login', {
+      const response = await fetch('/auth/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        // Tworzymy JSON zgodny z Twoim LoginUserDto
         body: JSON.stringify({ username, password }),
       });
 
       if (response.ok) {
         const data = await response.json();
-        // Zapisujemy token JWT do localStorage, aby używać go w przyszłych zapytaniach
         localStorage.setItem('token', data.token);
         setMessage('Login successful!');
+        setIsError(false);
         if (onLoginSuccess) onLoginSuccess();
       } else {
-        setMessage('Invalid username or password.');
+        setIsError(true);
+        try {
+          const errorData = await response.json();
+          if (errorData && errorData.error) {
+            setMessage(errorData.error); 
+          } else {
+            setMessage('Błędna nazwa użytkownika lub hasło.');
+          }
+        } catch (parseError) {
+          setMessage(`Błąd serwera (Status: ${response.status})`);
+        }
       }
     } catch (error) {
-      console.error('Error connecting:', error);
-      setMessage('Error connecting to the server.');
+      console.error('Błąd połączenia fetch:', error);
+      setIsError(true);
+      setMessage('Brak połączenia z serwerem Gateway.');
     }
   };
 
@@ -54,7 +66,12 @@ export default function Login({ onLoginSuccess }) {
         />
         <button type="submit">Login</button>
       </form>
-      {message && <p>{message}</p>}
+      {/* Wyświetlanie wiadomości (czerwona dla błędów, zielona/czarna dla sukcesu) */}
+      {message && (
+        <p style={{ color: isError ? '#e22134' : 'inherit', marginTop: '15px', fontWeight: 'bold' }}>
+          {message}
+        </p>
+      )}
     </div>
   );
 }

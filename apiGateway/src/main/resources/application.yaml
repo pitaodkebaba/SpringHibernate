@@ -1,0 +1,76 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: api-gateway
+  data:
+    redis:
+      host: redis
+      port: 6379
+  cloud:
+    gateway:
+      globalcors:
+        corsConfigurations:
+          '[/**]':
+            allowedOrigins: "*"
+            allowedMethods:
+              - GET
+              - POST
+              - PUT
+              - DELETE
+              - OPTIONS
+            allowedHeaders: "*"
+      routes:
+        # Przekierowanie ruchu auth Rate Limiting + Circuit Breaker
+        - id: backend-auth
+          uri: http://backend:8080
+          predicates:
+            - Path=/auth/**
+          filters:
+            - name: RequestRateLimiter
+              args:
+                redis-rate-limiter.replenishRate: 2
+                redis-rate-limiter.burstCapacity: 5
+                key-resolver: "#{@ipKeyResolver}"
+            - name: CircuitBreaker
+              args:
+                name: backendCircuitBreaker
+                fallbackUri: forward:/fallback
+
+        # Przekierowanie ruchu API tylko z Circuit Breaker
+        - id: backend-api
+          uri: http://backend:8080
+          predicates:
+            - Path=/api/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: backendCircuitBreaker
+                fallbackUri: forward:/fallback
+
+        # Frontend
+        - id: frontend
+          uri: http://frontend:8080
+          predicates:
+            - Path=/**
+
+# zasady działania bezpiecznika circuit breaker
+resilience4j:
+  circuitbreaker:
+    configs:
+      default:
+        slidingWindowSize: 10 # Analizuje ostatnie 10 zapytań
+        failureRateThreshold: 50 # Jeśli 50% z nich zawiedzie, odcina ruch
+        waitDurationInOpenState: 10s # Czeka 10 sekund przed próbą ponownego przepuszczenia ruchu
+        permittedNumberOfCallsInHalfOpenState: 3 # Wpuszcza 3 zapytania testowe, żeby sprawdzić, czy backend wstał
+  timelimiter:
+    configs:
+      default:
+        timeoutDuration: 3s # Jeśli backend nie odpowie w ciągu 3 sekund, traktuje to jako awarię
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
