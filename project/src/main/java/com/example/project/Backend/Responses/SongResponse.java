@@ -10,6 +10,7 @@ import lombok.experimental.SuperBuilder;
 @AllArgsConstructor
 @NoArgsConstructor
 public class SongResponse {
+    private String id;
     private String title;
     private String artist;
     private String album;

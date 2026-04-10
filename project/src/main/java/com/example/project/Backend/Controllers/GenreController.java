@@ -18,7 +18,6 @@ import java.util.List;
 public class GenreController {
     private final GenreService genreService;
 
-    @PreAuthorize("hasAuthority('ADMIN')")
     @GetMapping
     public ResponseEntity<SuccessResponse<List<Genre>>> getGenres() {
         List<Genre> genres = genreService.getAllGenres();

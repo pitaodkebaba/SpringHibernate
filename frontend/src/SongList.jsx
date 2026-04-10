@@ -13,7 +13,7 @@ const parseJwt = (token) => {
 export default function SongList() {
   const [songs, setSongs] = useState([]);
   const [genres, setGenres] = useState([]);
-  const [playlists, setPlaylists] = useState([]); // NOWE: Lista playlist
+  const [playlists, setPlaylists] = useState([]);
   const [loading, setLoading] = useState(true);
   const [_, setError] = useState('');
 
@@ -66,6 +66,7 @@ export default function SongList() {
         const plData = await plRes.json();
         setPlaylists(Array.isArray(plData) ? plData : (plData.data || plData.content || []));
       }
+      
 
     } catch (err) {
       console.error(err);
@@ -74,7 +75,7 @@ export default function SongList() {
       setLoading(false);
     }
   };
-  useEffect(() => { fetchData(); }, []);
+  useEffect(() => { fetchData(); console.log("Pobrane dane:", { songs, genres, playlists }); }, []);
 
   // --- FUNKCJE PLAYLIST ---
 

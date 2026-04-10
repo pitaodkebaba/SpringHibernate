@@ -100,6 +100,7 @@ public class SongService {
 
     private SongResponse convertToResponse(Song song) {
         return SongResponse.builder()
+                .id(String.valueOf(song.getId()))
                 .title(song.getTitle())
                 .artist(song.getArtist())
                 .album(song.getAlbum())
