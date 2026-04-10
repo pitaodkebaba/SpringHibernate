@@ -105,6 +105,29 @@ public class PlaylistService {
         }
     }
 
+    @Transactional
+    public void removeSongFromPlaylist(int playlistId, int songId) throws AccessDeniedException {
+        try {
+            User user = userService.authencticatedUser();
+            Playlist playlist = playlistRepository.findById(playlistId).orElseThrow();
+            
+            // Sprawdzamy, czy użytkownik ma prawo edytować tę playlistę
+            if (playlist.getUser().getId() != user.getId()) {
+                throw new AccessDeniedException("This playlist does not belong to you");
+            }
+
+            Song song = songRepository.findById(songId).orElseThrow();
+            
+            // Usuwamy piosenkę z listy i zapisujemy
+            playlist.getSongs().remove(song);
+            playlistRepository.save(playlist);
+        } catch (AccessDeniedException e) {
+            throw new AccessDeniedException(e.getMessage());
+        } catch (Exception e) {
+            throw new EntityNotFoundException("Playlist or Song not found");
+        }
+    }
+
     private Playlist convertToEntity(CreatePlaylistDto createPlaylistDto){
         Playlist playlist = new Playlist();
         playlist.setName(createPlaylistDto.getName());

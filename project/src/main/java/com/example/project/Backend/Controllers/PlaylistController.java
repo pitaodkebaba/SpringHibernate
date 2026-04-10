@@ -65,4 +65,11 @@ public class PlaylistController {
         SuccessResponse<Void> response = new SuccessResponse<>("Success", "Playlist deleted successfully", null);
         return ResponseEntity.ok(response);
     }
+
+    @DeleteMapping("/{playlistId}/removeSong/{songId}")
+    public ResponseEntity<?> removeSongFromPlaylist(@PathVariable int playlistId, @PathVariable int songId) throws AccessDeniedException {
+        playlistService.removeSongFromPlaylist(playlistId, songId);
+        SuccessResponse<Void> response = new SuccessResponse<>("Success", "Song removed from playlist successfully", null);
+        return ResponseEntity.ok(response);
+    }
 }
