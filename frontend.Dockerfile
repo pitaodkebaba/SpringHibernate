@@ -1,4 +1,4 @@
-# ETAP 1: Budowanie (Build)
+# ETAP 1: Budowanie
 # Używamy konkretnej, zamrożonej wersji Node na Alpine Linux
 FROM node:current-alpine3.22 AS build
 
@@ -15,9 +15,15 @@ RUN npm ci
 COPY . .
 RUN npm run build
 
-# ETAP 2: Serwowanie (Production)
+# ETAP 2: Serwowanie
 # Używamy oficjalnego obrazu Nginx w wersji UNPRIVILEGED (działa bez roota!)
 FROM nginxinc/nginx-unprivileged:alpine-perl
+
+# Przełączamy się na roota tylko po to, by zaktualizować system
+USER root
+RUN apk upgrade --no-cache
+# Wracamy do bezpiecznego użytkownika (w tym obrazie ma on ID 101, zdefiniowany jako nginx)
+USER 101
 
 # Kopiujemy skompilowane pliki z etapu 1
 # W Nginx unprivileged domyślny katalog to /usr/share/nginx/html
