@@ -14,6 +14,9 @@ FROM eclipse-temurin:21-jre-alpine
 # Ustawianie katalogu roboczego
 WORKDIR /app
 
+USER root
+RUN apk upgrade --no-cache
+
 # Tworzenie nieuprzywilejowanego użytkownika do uruchamiania aplikacji
 RUN addgroup -S appgroup && adduser -S appuser -G appgroup
 USER appuser

@@ -2,8 +2,8 @@
 
 | Target | Type | Vulnerabilities | Secrets |
 |:---|:---:|:---:|:---:|
-| `pitaodkebaba/backend:latest` (ubuntu 24.04) | `ubuntu` | 0 | - |
-| `app/MusicBrowser.jar` | `jar` | 0 | - |
+| `pitaodkebaba/api-gateway:latest` (alpine 3.23.3) | `alpine` | 0 | - |
+| `app/api-gateway.jar` | `jar` | 0 | - |
 
 **Legend:**
 
