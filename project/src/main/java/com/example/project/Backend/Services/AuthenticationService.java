@@ -28,6 +28,7 @@ public class AuthenticationService {
         return userRepository.save(user);
     }
 
+
     public User authenticate(LoginUserDto input) {
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
