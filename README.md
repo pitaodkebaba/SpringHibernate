@@ -78,10 +78,10 @@ Wszystkie obrazy zostały opracowane zgodnie z wytycznymi bezpieczeństwa i opty
 Obrazy zostały poddane skanowaniu na obecność luk w zabezpieczeniach narzędziem Trivy.
 Szczegółowe raporty i uzasadnienia dla ewentualnych podatności znajdują się w plikach:
 
-* `backend_scan.md`
-* `gateway_scan.md`
-* `apigateway_scan.md`
-* `database_scan.md`
+* `trivy_scans/backend_scan.md`
+* `trivy_scans/gateway_scan.md`
+* `trivy_scans/apigateway_scan.md`
+* `trivy_scans/database_scan.md`
 
 ## 5. SBOM (Software Bill of Materials)
 
