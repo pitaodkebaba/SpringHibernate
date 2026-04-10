@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.util.List;
+import java.io.Serializable;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -12,7 +13,9 @@ import java.util.List;
 @Builder
 @Entity
 @Table(name = "playlists")
-public class Playlist {
+public class Playlist implements Serializable {
+    private static final long serialVersionUID = 1L;
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(nullable = false)
