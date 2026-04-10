@@ -1,0 +1,27 @@
+version: '3.8'
+
+services:
+  api-gateway:
+    image: my-api-gateway
+    ports:
+      - "80:8080"
+    depends_on:
+      - frontend
+      - backend
+      - redis
+
+  frontend:
+    image: frontend:secure
+    depends_on:
+      - backend
+
+  backend:
+    image: backend
+    depends_on:
+      - db
+
+  redis:
+    image: redis:7-alpine
+
+  db:
+    image: db
