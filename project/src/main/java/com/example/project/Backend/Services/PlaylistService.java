@@ -54,6 +54,7 @@ public class PlaylistService {
         }
     }
 
+    @Cacheable(value = "playlist", key = "#id")
     public Optional<Playlist> getPlaylistById(int id) throws AccessDeniedException {
         try {
             User user = userService.authencticatedUser();
