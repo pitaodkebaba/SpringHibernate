@@ -11,6 +11,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
+import java.io.Serializable;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -19,7 +20,7 @@ import java.util.List;
 @Builder
 @Entity
 @Table(name = "users")
-public class User implements UserDetails {
+public class User implements UserDetails, Serializable {
     public enum Role implements GrantedAuthority {
         USER, ADMIN;
 
@@ -28,6 +29,8 @@ public class User implements UserDetails {
             return name();
         }
     }
+
+    private static final long serialVersionUID = 1L;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
