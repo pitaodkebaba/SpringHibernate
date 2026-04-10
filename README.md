@@ -8,7 +8,7 @@ Zgodnie z wymaganiami projektu, poniżej przedstawiono architekturę aplikacji:
 * **Frontend**: Aplikacja Single Page Application (SPA) oparta na React + Vite, serwowana przez Nginx (obraz unprivileged).
 * **Backend**: Mikroserwis REST API zbudowany w Spring Boot 3, wykorzystujący Java 21 i Maven.
 * **Database (MySQL)**: Baza danych 8.0 do przechowywania informacji o użytkownikach, piosenkach i playlistach.
-* **Cache (Redis)**: Baza in-memory wspierająca działanie mechanizmu Rate Limitingu na bramie API.
+* **Cache (Redis)**: Baza in-memory wspierająca działanie mechanizmu Rate Limitingu na bramie API, cache'uje dane dotyczące playlist.
 
 ```mermaid
 graph TD
@@ -54,16 +54,16 @@ graph TD
     style MySQL fill:#fff2cc,stroke:#333,stroke-width:2px
 ```
 
-> **Zadanie 1.6**: Graficzna reprezentacja architektury wygenerowana przez `compose-viz` znajdzie się w pliku `architektura.png`.
+> **Zadanie 1.6**: Graficzna reprezentacja architektury wygenerowana przez `compose-viz` znajduje się w pliku `architektura.png`.
 
 ## 2. Repozytoria DockerHub
 
 Obrazy są budowane jako wieloarchitekturowe (`linux/amd64`, `linux/arm64`) i zawierają wbudowane informacje SBOM.
 
-* **Api Gateway**: *(Link zostanie dodany po przesłaniu obrazu)*
+* **Api Gateway**: [Link do DockerHub - pitaodkebaba/apigateway](https://hub.docker.com/r/pitaodkebaba/api-gateway)
 * **Backend**: [Link do DockerHub - pitaodkebaba/backend](https://hub.docker.com/r/pitaodkebaba/backend)
-* **Frontend**: *(Link zostanie dodany po przesłaniu obrazu)*
-* **Database**: *(Link zostanie dodany po przesłaniu obrazu)*
+* **Frontend**: [Link do DockerHub - pitaodkebaba/frontend](https://hub.docker.com/r/pitaodkebaba/frontend)
+* **Database**: [Link do DockerHub - pitaodkebaba/database](https://hub.docker.com/r/pitaodkebaba/database)
 
 ## 3. Pliki Dockerfile i Dobre Praktyki
 
@@ -76,12 +76,12 @@ Wszystkie obrazy zostały opracowane zgodnie z wytycznymi bezpieczeństwa i opty
 ## 4. Analiza Podatności (Trivy)
 
 Obrazy zostały poddane skanowaniu na obecność luk w zabezpieczeniach narzędziem Trivy.
-Szczegółowe raporty i uzasadnienia dla ewentualnych podatności (m.in. w obrazach bazowych Javy) znajdują się w plikach:
+Szczegółowe raporty i uzasadnienia dla ewentualnych podatności znajdują się w plikach:
 
 * `backend_scan.md`
 * `gateway_scan.md`
-
-Ewentualne luki w serwerach wbudowanych mają zminimalizowany wektor ataku, ponieważ aplikacje są ukryte w wirtualnej podsieci Dockera i nie są wystawione bezpośrednio na świat
+* `apigateway_scan.md`
+* `database_scan.md`
 
 ## 5. SBOM (Software Bill of Materials)
 
