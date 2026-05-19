@@ -13,43 +13,53 @@ Zgodnie z wymaganiami projektu, poniżej przedstawiono architekturę aplikacji:
 ```mermaid
 graph TD
     %% Sekcja Klienta
-    subgraph Zewnatrz [Urzadzenie Uzytkownika]
+    subgraph Urzadzenie_Uzytkownika
         Client[Przegladarka Internetowa]
-        ReactApp[Uruchomiona Aplikacja React<br/>w pamieci przegladarki]
+        ReactApp[Uruchomiona Aplikacja React]
         Client --- ReactApp
     end
   
-    %% Sekcja Serwera (Wewnetrzna Siec)
-    subgraph Wewnatrz [Docker Wewnetrzna Siec app-network]
-        Gateway[API Gateway<br/>Spring Cloud]
-        Frontend[Frontend<br/>Nginx]
-        Backend[Backend<br/>Spring Boot]
-        Redis[(Redis<br/>Rate Limiting)]
-        MySQL[(MySQL<br/>Baza Danych)]
+    %% Sekcja Serwera - Siec Zewnetrzna
+    subgraph Frontend_Network
+        Gateway[API Gateway <br/> Spring Cloud]
+        Frontend[Frontend Kontener <br/> Nginx statyki]
     end
 
-    %% Punkt wejscia
-    Client -.->|Ruch HTTP na port 80| Gateway
+    %% BACKEND - MOST MIEDZY SIECIAMI
+    Backend{{Backend - Spring Boot <br/> MOST SIECIOWY}}
 
-    %% PRZEPLYW 1: POBIERANIE STRONY
-    Gateway -.->|Routing sciezki uzytkownika| Frontend
-    Frontend -.->|Zwraca skompilowane pliki React JS, CSS, HTML| Client
+    %% Sekcja Serwera - Siec Prywatna
+    subgraph Backend_Network
+        Redis[(Redis <br/> Cache i Limitery)]
+        MySQL[(MySQL <br/> Baza Danych)]
+    end
 
-    %% PRZEPLYW 2: KOMUNIKACJA Z API I LOGOWANIEM
-    ReactApp ==>|Wysyla zapytania na API lub AUTH| Gateway
-    Gateway <-->|Weryfikacja zapytan - Rate Limiting| Redis
-    Gateway ==>|Przekazuje ruch do Javy| Backend
-    Backend ==>|Zwraca JSON lub blad 503| ReactApp
+    %% PRZEPLYW RUCHU
+    Client -.->|Ruch HTTP port 80| Gateway
 
-    %% Backend Logika
-    Backend <-->|Zapis i Odczyt Danych| MySQL
+    %% Frontend routing
+    Gateway -.->|Routing sciezka /| Frontend
+    Frontend -.->|Zwraca pliki Reacta| Client
 
-    %% Kolory i style
+    %% API routing
+    ReactApp ==>|Zapytania na /api lub /auth| Gateway
+    Gateway ==>|Przekazuje ruch frontend-network| Backend
+    
+    %% Logika Backendu
+    Backend ==>|Odczyt i Zapis| Redis
+    Backend ==>|Odczyt i Zapis| MySQL
+    
+    Backend ==>|Zwraca odpowiedz JSON| ReactApp
+
+    %% Kolory i style blokow
     style Client fill:#e6f3ff,stroke:#333,stroke-width:2px
     style ReactApp fill:#61dafb,stroke:#333,stroke-width:2px,color:#000
     style Gateway fill:#ff9999,stroke:#333,stroke-width:2px,color:#000
     style Frontend fill:#f9f9f9,stroke:#333,stroke-width:2px
-    style Backend fill:#d5e8d4,stroke:#333,stroke-width:2px
+    
+    %% Wyroznienie Backendu jako mostu
+    style Backend fill:#d5e8d4,stroke:#27ae60,stroke-width:4px,color:#000
+    
     style Redis fill:#ffcc99,stroke:#333,stroke-width:2px
     style MySQL fill:#fff2cc,stroke:#333,stroke-width:2px
 ```

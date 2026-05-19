@@ -1,41 +1,29 @@
 services:
-
-  redis:
-    image: redis:7-alpine
-    networks:
-      - app-network
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-
   api-gateway:
     image: api-gateway
     build:
       context: "./apiGateway"
       dockerfile: "../api-gateway.Dockerfile"
     ports:
-      - "80:8080"
+      - "80:8080" # Tylko Gateway jest wystawiony na zewnątrz (na hosta)
     depends_on:
       frontend:
         condition: service_started
       backend:
         condition: service_started
-      redis:
-        condition: service_healthy # Gateway czeka na gotowość Redisa
     networks:
-      - app-network
+      - frontend-network
+      - backend-network
+    restart: unless-stopped
 
   frontend:
     image: frontend:secure
     build:
       context: "./frontend" 
       dockerfile: "../frontend.Dockerfile"
-    depends_on:
-      - backend
     networks:
-      - app-network
+      - frontend-network # Frontend nie ma pojęcia o istnieniu bazy danych czy redisa
+    restart: unless-stopped
 
   backend:
     image: backend
@@ -45,8 +33,23 @@ services:
     depends_on:
       db:
         condition: service_healthy
+      redis:
+        condition: service_healthy # Backend potrzebuje Redisa, więc musi na niego poczekać
     networks:
-      - app-network
+      - frontend-network # Odbiera ruch od API Gateway
+      - backend-network  # Wysyła zapytania do DB i Redisa
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    networks:
+      - backend-network # Ukryty w prywatnej sieci
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
 
   db:
     image: db
@@ -54,22 +57,24 @@ services:
       context: "./Database"
       dockerfile: "../database.Dockerfile"
     env_file:
-        - "./Database/.env"
+      - "./Database/.env"
     networks:
-      - app-network
+      - backend-network # Ukryty w prywatnej sieci
     volumes:
-        - db-data:/var/lib/mysql
+      - db-data:/var/lib/mysql
     healthcheck:
-        test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
-        interval: 10s
-        timeout: 5s
-        retries: 5
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
 
 networks:
-  app-network:
+  frontend-network:
     driver: bridge
+  backend-network:
+    driver: bridge
+    internal: true
 
 volumes:
   db-data:
-
-  
